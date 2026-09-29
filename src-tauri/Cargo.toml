@@ -1,0 +1,34 @@
+[package]
+name = "eo-light"
+version = "5.0.0"
+edition = "2021"
+default-run = "EO-Light"
+
+[[bin]]
+name = "EO-Light"
+path = "src/main.rs"
+
+[lib]
+name = "eo_light"
+path = "src/lib.rs"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[features]
+custom-protocol = ["tauri/custom-protocol"]
+
+[dependencies]
+tauri = { version = "2", features = ["tray-icon", "image-png", "image-ico"] }
+tauri-plugin-single-instance = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1", features = ["full"] }
+if-addrs = "0.13"
+mdns-sd = "0.13"
+
+[profile.release]
+opt-level = "s"
+strip = true
+lto = "thin"
+codegen-units = 1

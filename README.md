@@ -1,225 +1,73 @@
-<p align="center">
-  <img src="assets/LightController.png" width="88" alt="LightController simgesi">
-</p>
+# EO-Light 5
 
-<h1 align="center">LightController</h1>
-<p align="center">Windows için yerel ağ üzerinden akıllı ampul kontrolü.</p>
-<p align="center">
-  <img src="https://img.shields.io/badge/platform-Windows-0078D4" alt="Windows">
-  <img src="https://img.shields.io/badge/language-C%23-512BD4" alt="C#">
-  <img src="https://img.shields.io/badge/UI-WinForms-5C2D91" alt="WinForms">
-  <img src="https://img.shields.io/badge/connection-Local%20LAN-2D8A65" alt="Yerel ağ">
-</p>
+Windows için yerel ağda birden fazla akıllı ampulü yöneten masaüstü uygulaması. Ampullere ayrı bağlantılar kurar; soldan seçtiğin ampulün güç, parlaklık ve desteklediği renk ayarlarını sağdaki panelden değiştirirsin.
 
-LightController, desteklenen akıllı ampulleri bilgisayardan açıp kapatmak,
-parlaklıklarını ayarlamak ve donanım destekliyorsa renklerini değiştirmek için
-geliştirilmiş taşınabilir bir Windows uygulamasıdır. Işık komutlarını yerel ağ
-üzerinden doğrudan cihaza gönderir; bulut hesabı ya da uygulamaya ait bir sunucu gerektirmez.
+Bu depo ilk commit'inde **LightController 4.1** adlı C# sürümünü içeriyordu. İkinci commit'ten itibaren ana uygulama **EO-Light 5**'tir. Eski sürümün kaynakları ve derleme betikleri güncel proje ağacından çıkarılmıştır.
 
-Bu repo **4.1 tabanlı C# / WinForms sürümünü** içerir. Birden fazla cihazı keşfeder,
-ancak aynı anda **seçili tek ampulü** kontrol eder.
+## İndir ve kullan
 
-![LightController kontrol paneli](docs/images/dashboard.png)
+[Releases](https://github.com/erenozhan95/LightController/releases) sayfasındaki `EO-Light-5-windows.zip` dosyasını indirip çıkar. `EO-Light.exe` ve `KULLANIM.md` aynı klasörde bulunur. Windows 10/11 x64 ve WebView2 gerekir. Ampullerle bilgisayar aynı yerel ağda olmalı; Yeelight ampullerinde **LAN Kontrolü** açık olmalı.
 
-*Görsel, gerçek uygulama kontrolleriyle üretilmiş örnek RGB cihaz görünümüdür;
-canlı bir cihaz ölçümü değildir.*
-
-## İçindekiler
-
-- [Özellikler](#özellikler)
-- [Kullanılan teknolojiler](#kullanılan-teknolojiler)
-- [Desteklenen cihazlar](#desteklenen-cihazlar)
-- [Kurulum ve kullanım](#kurulum-ve-kullanım)
-- [Kaynak koddan derleme](#kaynak-koddan-derleme)
-- [Nasıl çalışıyor?](#nasıl-çalışıyor)
-- [Proje yapısı](#proje-yapısı)
-- [Testler](#testler)
-- [Sınırlar ve sorun giderme](#sınırlar-ve-sorun-giderme)
-- [Katkı ve teşekkür](#katkı-ve-teşekkür)
+[Türkçe kullanım kılavuzu](docs/KULLANIM.md)
 
 ## Özellikler
 
-- **Aç / kapat:** ilave ışık geçiş animasyonu olmadan güç komutu.
-- **Parlaklık:** %1–100 aralığı ve ayrı uygulama düğmesi.
-- **Dört favori:** seçilen parlaklığı kaydetme ve tek tıkla uygulayıp ampulü açma.
-- **Beyaz tonu:** destekleyen modellerde 1700–6500 K; sıcak, doğal ve soğuk hazır değerler.
-- **RGB:** hazır palet ve özel renk seçimi. Desteklemeyen modellerde kontroller pasiftir.
-- **Cihaz keşfi:** Yeelight LAN, SSDP/UPnP ve mDNS/DNS-SD sağlayıcıları.
-- **Kontrollü tarama:** yalnızca açılışta ve **Yeniden tara** düğmesiyle ağ taraması.
-- **Bağlantıyı koruma:** komutlar arasında açık TCP bağlantısı ve bilinen adrese yeniden bağlanma.
-- **Yerel ayarlar:** seçilen cihaz ve favorilerin JSON dosyasında tutulması.
-- **Sistem tepsisi:** pencereyi gizleme, geri açma ve çıkış menüsü.
-- **Koyu arayüz:** özel çizilmiş kartlar, düğmeler, kaydırıcılar ve ampul göstergesi.
+- Açılışta bir kez tarama; sonrasında yalnızca **Yeniden tara** düğmesiyle keşif.
+- Bulunan ampullerin her biri için bağımsız, kalıcı TCP bağlantısı.
+- Ampul seçimi, bağlantı durumunu ve diğer ampullerin ayarlarını değiştirmez.
+- Aç/kapat, %1–100 parlaklık, ampul başına dört parlaklık kaydı.
+- Donanım destekliyorsa RGB renk ve 1700–6500 K beyaz sıcaklığı.
+- Cihaz adı değiştirme, koyu/açık tema ve sistem tepsisine küçültme.
+- Cihaz kimliğiyle eşleştirme; IP değiştiğinde isteğe bağlı yeni taramada güncelleme.
+- SSDP/UPnP ve belirli mDNS servislerini listeler. Bu cihazlar için genel kontrol sürücüsü bulunmaz.
 
-## Kullanılan teknolojiler
+## Teknolojiler
 
-| Teknoloji | Projedeki görevi |
-| --- | --- |
-| **C#** | Uygulama mantığı, cihaz modelleri ve ağ işlemleri |
-| **.NET Framework** | Windows masaüstü çalışma zamanı ve standart kütüphaneler |
-| **Windows Forms** | Ana pencere, cihaz seçimi, olaylar ve sistem tepsisi |
-| **System.Drawing / GDI+** | Yuvarlatılmış kartlar, özel kontroller ve durum simgelerinin çizimi |
-| **System.Net.Sockets** | UDP keşfi ve TCP üzerinden ampul komutları |
-| **Task / async-await / SemaphoreSlim** | Ağ işlemlerini arayüzden ayırma ve seçili cihazın işlemlerini sıralama |
-| **JavaScriptSerializer** | JSON protokol mesajları ve yerel ayarların serileştirilmesi |
-| **Windows IP Helper / SendARP** | Gerektiğinde yerel cihaz kimliği için MAC çözümleme |
-| **PowerShell** | Tek komutla derleme ve test çalıştırma |
-| **GitHub Actions** | Windows üzerinde derleme/test ve taşınabilir çıktı oluşturma |
-
-Uygulama harici NuGet paketleri, Node.js, Electron, Python veya bir web sunucusu kullanmaz.
-RGB ve beyaz tonu yetenekleri cihazın keşif yanıtından okunur; arayüzün görünmesi tek
-başına donanımın bu özelliklere sahip olduğu anlamına gelmez.
-
-## Desteklenen cihazlar
-
-| Cihaz / protokol | Keşif | Kontrol |
+| Katman | Teknoloji | Görevi |
 | --- | --- | --- |
-| Yeelight LAN destekli ampuller | Evet | Aç/kapat ve parlaklık; destekliyorsa RGB / Kelvin |
-| SSDP / UPnP duyurusu yapan cihazlar | Evet | Uygun HTTP(S) adresi duyurulmuşsa web arayüzünü açma |
-| mDNS / DNS-SD hizmetleri | Uygun yanıt alınırsa | HTTP(S) hizmetlerinde web arayüzünü açma |
-| Matter / HomeKit gibi farklı protokoller | Bazı hizmet duyuruları bulunabilir | Eşleştirme ve doğrudan kontrol uygulanmadı |
+| Masaüstü | Tauri 2, WebView2 | Windows penceresi, sistem tepsisi ve arayüz köprüsü |
+| Arayüz | TypeScript, Vite, CSS, Lucide | Cihaz listesi ve kontroller |
+| Yerel servis | Rust, Tokio | Keşif, bağımsız TCP bağlantıları ve komutlar |
+| Veri | JSON | Cihaz adları, seçim, tema ve parlaklık kayıtları |
 
-**Ağda bulunmak, kontrol edilebilmekle aynı şey değildir.** Mevcut ışık sürücüsü
-Yeelight LAN protokolünü kullanır. Sabit beyaz modellerde RGB veya
-ayarlanabilir beyaz sıcaklığı yazılımla eklenemez.
-
-## Kurulum ve kullanım
-
-### Gereksinimler
-
-- Windows 10/11 ve etkin .NET Framework; .NET Framework 4.8 veya üstü önerilir.
-- Bilgisayar ile ampulün aynı yerel ağda olması.
-- Ampulde **LAN Control / LAN Kontrolü** seçeneğinin açık olması.
-- Ampulün fiziksel elektrik bağlantısının açık kalması.
-
-### İlk çalıştırma
-
-1. Kaynak kodu aşağıdaki komutlarla derle.
-2. `dist/LightController/LightController.exe` dosyasını aç.
-3. İlk ağ taramasının tamamlanmasını bekle.
-4. **Cihazları yönet** ekranında ampulü seçip **Işığı kontrol et** düğmesine bas.
-5. Güç, parlaklık ve desteklenen renk kontrollerini kullan.
-
-İlk çalıştırmada sabit bir ev ağı IP'si varsayılmaz; kullanılacak ampul kullanıcı tarafından seçilir.
-IP değişirse **Yeniden tara** düğmesiyle listeyi güncelle.
-
-Herhangi bir kurulum sihirbazı gerekmez. Uygulamanın bulunduğu klasör yazılabilir olmalıdır.
-Derleme iş akışı başarılı olduğunda Actions çalıştırmasının **Artifacts** bölümünde
-`LightController-windows` paketi de bulunabilir.
-
-**[Ayrıntılı kullanım kılavuzu →](docs/KULLANIM.md)**
+Işık kontrolü için bulut hesabı veya uygulamaya ait bir sunucu gerekmez. Şu anki doğrudan kontrol sürücüsü **Yeelight LAN** protokolünü destekler. Diğer markalar ağ keşfinde görünebilir; kontrol için kendi protokollerine uygun sürücü ve gerekirse eşleştirme eklenmelidir.
 
 ## Kaynak koddan derleme
 
-Repo kökünde PowerShell aç:
+Windows 10/11 x64 üzerinde Node.js, Rust MSVC toolchain, Microsoft C++ Build Tools, Windows SDK ve WebView2 gerekir. [Tauri önkoşulları](https://v2.tauri.app/start/prerequisites/) kurulduktan sonra depo kökünde:
 
 ```powershell
-git clone https://github.com/erenozhan95/LightController.git
-cd LightController
-.\scripts\build.ps1
+npm ci
+npm run tauri build -- --no-bundle
 ```
 
-Betik, Windows'taki .NET Framework C# derleyicisini bulur ve tek bir `winexe` üretir.
-Visual Studio veya ayrı bir paket yöneticisi gerektirmez.
-
-```text
-dist/LightController/
-├── LightController.exe
-├── KULLANIM.md
-├── THIRD_PARTY_NOTICES.md
-└── third-party/
-```
-
-İlk kullanımda bu klasörün yanında `Ayarlar/ayarlar.json` oluşur. Bu dosya ve derleme
-çıktıları Git tarafından izlenmez. Kendi cihaz bilgilerini repo içine ekleme.
-
-## Nasıl çalışıyor?
-
-```mermaid
-flowchart LR
-    UI[WinForms kontrol paneli] --> C[ILightController]
-    C --> L[LampSession]
-    L -->|TCP / JSON| B[Seçili ampul]
-    UI -->|Açılış veya Yeniden tara| D[Keşif sağlayıcıları]
-    D --> Y[Yeelight LAN]
-    D --> S[SSDP / UPnP]
-    D --> M[mDNS / DNS-SD]
-    D --> K[Son tarama önbelleği]
-    K --> P[Cihaz seçici]
-    UI --> J[Yerel JSON ayarları]
-```
-
-1. Açılışta keşif sağlayıcıları çalışır ve sonuçlar ortak listeye alınır.
-2. Cihaz seçildiğinde `LampSession` üzerinden kontrol edilir.
-3. Her komut benzersiz bir JSON istek kimliğiyle TCP bağlantısından gönderilir.
-4. Aynı bağlantı sonraki komutlarda yeniden kullanılır. Yeniden bağlanma, ağ taraması başlatmaz.
-5. Durum 10 saniyelik zamanlayıcıyla okunur. Bu işlem cihaz keşfi değildir.
-6. Pencere küçültüldüğünde sistem tepsisine geçer; bağlantı arka planda devam eder.
-
-Keşif ve protokol ayrıntıları: **[Mimari ve ağ iletişimi](docs/ARCHITECTURE.md)**.
-
-## Proje yapısı
-
-```text
-LightController/
-├── src/
-│   ├── LightController.cs     # Model, ayarlar, TCP oturumu ve uygulama akışı
-│   ├── Dashboard.cs           # Özel çizimli WinForms arayüzü
-│   ├── Discovery.cs           # Yeelight keşfi ve cihaz kimliği
-│   ├── NetworkDiscovery.cs    # Genel SSDP/mDNS sağlayıcıları
-│   └── DevicePicker.cs        # Önbellekli cihaz seçimi ve elle IP girişi
-├── assets/                    # Uygulama simgeleri
-├── docs/                      # Kullanım, mimari ve örnek ekran görüntüsü
-├── scripts/                   # Derleme / test betikleri
-├── tests/                     # Sahte cihaz ve arayüz doğrulamaları
-├── third-party/               # Kaynak alınan projelerin lisansları
-└── .github/                   # Windows CI ve katkı şablonları
-```
+Çıktı: `src-tauri/target/release/EO-Light.exe`. Geliştirme için `npm run tauri dev` kullan.
 
 ## Testler
 
 ```powershell
-.\scripts\test.ps1
+npm ci
+npm run build
+cd src-tauri
+cargo test --locked --lib --tests
 ```
 
-- **TestDashboard:** RGB/Kelvin komut parametreleri, desteklenmeyen özelliklerin engellenmesi,
-  favori kaydı ve mono/RGB/yalnız-Kelvin arayüz durumları.
-- **TestScanPolicy:** bağlantının yeniden kullanılması, bağlantı kopunca yeniden deneme,
-  komut sırasında keşif yapılmaması, cihaz seçicinin önbelleği kullanması.
-- **TestGeneral:** SSDP ve DNS kayıtlarının ayrıştırılması, bozuk DNS paketlerinin reddi,
-  protokol birleştirme ve yanlış cihaza ışık kontrolleri sunulmaması.
+Rust testleri sahte TCP ampuller ve örnek ağ adresleri kullanır; evdeki cihazları kontrol etmez. İsteğe bağlı arayüz testi için Vite geliştirme sunucusu çalışırken `node ui-test.mjs` komutunu kullan. Test çıktıları `artifacts/` altında kalır ve depoya eklenmez.
 
-Testler loopback üzerinde sahte TCP cihazları kullanır; evdeki ampullerin ayarlarını
-değiştirmez. Görsel çıktılar ve geçici ayarlar `artifacts/tests/` altına yazılır.
-RGB komutlarının protokol testleri, her fiziksel modelin doğrulandığı anlamına gelmez.
+`scripts/check-public-files.ps1` Git'e eklenen dosyalarda özel ayarları, yerel IP'leri ve kullanıcı klasör yollarını kontrol eder; CI her push'ta çalıştırır.
 
-## Sınırlar ve sorun giderme
+## Dosya düzeni
 
-- Aynı anda **tek seçili ampulün** bağlantısı yönetilir. Birden fazla ampule eşzamanlı
-  bağlantı bu sürümün kapsamı dışındadır.
-- Dört parlaklık kaydı uygulama genelindedir; ampul başına ayrı kayıt tutulmaz.
-- Durum, her özellik bildirimiyle anında işlenmek yerine periyodik sorgularla güncellenir.
-- IP çalışma sırasında değişirse kullanıcı taramayı yenilemelidir.
-- İlk tarama birkaç saniye sürebilir. Komutlar keşif işlemini tekrar başlatmaz;
-  gerçek yanıt süresi ağ ve ampul yazılımına bağlıdır.
-- Misafir ağı, istemci izolasyonu, VPN veya güvenlik duvarı keşfi engelleyebilir.
-- Yerel protokol şifreleme veya uygulama içi kullanıcı doğrulaması sağlamaz;
-  uygulama güvenilen ev ağı için tasarlanmıştır.
-- Ağdaki her cihaz kendini duyurmadığından keşif listesi eksiksiz ağ envanteri değildir.
+```text
+src/                 TypeScript arayüzü
+src-tauri/src/       Rust uygulaması, keşif ve bağlantılar
+src-tauri/tests/     Sahte ampullerle entegrasyon testleri
+docs/KULLANIM.md     Kullanım kılavuzu
+third-party/         Üçüncü taraf lisans metinleri
+```
 
-## Katkı ve teşekkür
+Kişisel cihaz ayarları `Ayarlar/eo-light-v5.json` içinde yalnızca kullanıcının bilgisayarında tutulur; bu dosya Git tarafından yok sayılır. `--diagnose` seçeneğiyle üretilen yerel ağ dökümü de depoya eklenmez.
 
-Hata bildirimleri ve geliştirme önerileri için [Issues](https://github.com/erenozhan95/LightController/issues)
-kullanılabilir. Değişiklik göndermeden önce [katkı rehberini](CONTRIBUTING.md) oku.
+## Lisans ve teşekkür
 
-Yeelight UDP keşfi ve bazı komut parametrelerinde
-**[EmreOzhan/smart-gadget](https://github.com/emreozhan/smart-gadget)** projesinden
-yararlanılmıştır. Orijinal MIT lisansı ve ayrıntılar
-[üçüncü taraf bildirimlerinde](THIRD_PARTY_NOTICES.md) korunmuştur.
-
-Sürüm notları: [CHANGELOG.md](CHANGELOG.md).
-
-## Lisans
-
-Copyright © 2026 Eren Özhan. Proje [MIT lisansı](LICENSE) ile yayımlanır.
-Üçüncü tarafların kendi lisans ve telif bildirimleri ayrıca geçerlidir.
+Kod [MIT lisanslıdır](LICENSE). [EmreOzhan/smart-gadget](https://github.com/emreozhan/smart-gadget) projesinin keşif ve kalıcı bağlantı yaklaşımından yararlanıldı; ilgili MIT bildirimi [third-party/smart-gadget-LICENSE.txt](third-party/smart-gadget-LICENSE.txt) içindedir. Arayüz simgeleri için Lucide'nin [ISC lisansı](third-party/LUCIDE-LICENSE.txt) korunur.

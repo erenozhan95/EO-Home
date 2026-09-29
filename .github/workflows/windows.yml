@@ -1,0 +1,42 @@
+name: Windows build and tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Check published files
+        shell: pwsh
+        run: ./scripts/check-public-files.ps1
+      - name: Install frontend dependencies
+        run: npm ci
+      - name: Test Rust service
+        working-directory: src-tauri
+        run: cargo test --locked --lib --tests
+      - name: Build portable application
+        run: npm run tauri build -- --no-bundle
+      - name: Upload Windows application
+        uses: actions/upload-artifact@v4
+        with:
+          name: EO-Light-5-windows
+          path: |
+            src-tauri/target/release/EO-Light.exe
+            docs/KULLANIM.md
+            LICENSE
+            THIRD_PARTY_NOTICES.md
+            third-party/*
+          if-no-files-found: error

@@ -1,0 +1,1 @@
+{"identifier":"main","description":"Local control window","windows":["main"],"permissions":["core:default","core:window:allow-hide","core:window:allow-close","core:window:allow-start-dragging","core:window:allow-toggle-maximize"]}

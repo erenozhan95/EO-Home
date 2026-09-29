@@ -1,25 +1,29 @@
-# Local device preferences and network inventory
+# Personal device preferences and diagnostics
 Ayarlar/
+**/Ayarlar/
 ayarlar.json
-son-ip.txt
+eo-light-v5.json
+diagnostics.json
 *.local.json
 .env
 .env.*
 !.env.example
 
-# Build / test artifacts
+# Dependencies, builds, and test output
+node_modules/
 dist/
+src-tauri/target/
+src-tauri/gen/
 artifacts/
+test-results/
+playwright-report/
 work/
-bin/
-obj/
 *.exe
 *.dll
 *.pdb
 *.zip
-__pycache__/
 
-# Editors / OS
+# Editors and operating system files
 .vs/
 .idea/
 *.user

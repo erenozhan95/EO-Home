@@ -1,20 +1,12 @@
-# Değişiklik günlüğü
+# Sürüm geçmişi
 
-## 4.1 — LightController repo sürümü
+## 5.0.0
 
-- Uygulama adı LightController olarak düzenlendi.
-- Kaynaklar, simgeler, belgeler ve testler ayrı klasörlere alındı.
-- Tek komutla derleme/test betikleri ve Windows CI iş akışı eklendi.
-- Kullanım, mimari, teknoloji ve katkı belgeleri hazırlandı.
-- İlk çalıştırmada kişisel ağa ait sabit IP varsayımı kaldırıldı.
-- Açılış ve elle tarama dışındaki işlemlerde keşif yapılmaması davranışı korundu.
+- Uygulama Rust, Tauri 2 ve TypeScript ile yeniden yazıldı.
+- Birden fazla ampulle aynı anda bağımsız bağlantı kuruldu.
+- Ampul başına ad ve parlaklık kayıtları, tema ve sistem tepsisi eklendi.
+- Cihaz taraması açılışta bir kez ve kullanıcı isteğiyle yapılacak şekilde düzenlendi.
 
-## Önceki geliştirme aşamaları
+## 4.1
 
-- **4.0:** özel çizimli kontrol paneli, RGB paleti ve beyaz sıcaklığı kontrolleri.
-- **3.1:** genel SSDP/UPnP ve mDNS keşfi, ortak cihaz listesi.
-- **3.0:** ampul keşfi ve cihaz kimliğiyle eşleme.
-- **2.x:** kalıcı bağlantı, parlaklık kayıtları ve sistem tepsisi.
-
-Bu liste uygulamanın yerel geliştirme geçmişini özetler; önceki sürümlere ait
-GitHub etiketi veya yayımlanmış release bulunduğu anlamına gelmez.
+- LightController adlı C# / Windows Forms sürümü. Kaynakları ilk Git commit'inde arşivlidir.
