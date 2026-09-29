@@ -1,0 +1,24 @@
+name: Windows build and tests
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build portable app
+        shell: powershell
+        run: ./scripts/build.ps1
+      - name: Run loopback and UI tests
+        shell: powershell
+        run: ./scripts/test.ps1
+      - name: Upload portable app
+        uses: actions/upload-artifact@v4
+        with:
+          name: LightController-windows
+          path: dist/LightController/
+          if-no-files-found: error

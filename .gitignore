@@ -1,0 +1,29 @@
+# Local device preferences and network inventory
+Ayarlar/
+ayarlar.json
+son-ip.txt
+*.local.json
+.env
+.env.*
+!.env.example
+
+# Build / test artifacts
+dist/
+artifacts/
+work/
+bin/
+obj/
+*.exe
+*.dll
+*.pdb
+*.zip
+__pycache__/
+
+# Editors / OS
+.vs/
+.idea/
+*.user
+*.suo
+Thumbs.db
+desktop.ini
+.DS_Store
