@@ -6,7 +6,7 @@ Bu depo ilk commit'inde **LightController 4.1** adlı C# sürümünü içeriyord
 
 ## İndir ve kullan
 
-Güncel derlemenin `EO-Home-windows` dosyasını [Windows build and tests](https://github.com/erenozhan95/EO-Home/actions/workflows/windows.yml) iş akışının başarılı son çalışmasından indir. İçinde `EO-Home.exe` ve `KULLANIM.md` bulunur. Windows 10/11 x64 ve WebView2 gerekir. Ampullerle bilgisayar aynı yerel ağda olmalı; Yeelight ampullerinde **LAN Kontrolü** açık olmalı. [Releases](https://github.com/erenozhan95/EO-Home/releases) sayfasındaki önceki paketler eski adı taşıyabilir.
+[Son EO-Home sürümünü](https://github.com/erenozhan95/EO-Home/releases/latest) indir. `EO-Home-Windows.zip` içinde `EO-Home.exe` ve `KULLANIM.md` bulunur; exe ayrıca doğrudan indirilebilir. Windows 10/11 x64 ve WebView2 gerekir. Ampullerle bilgisayar aynı yerel ağda olmalı; Yeelight ampullerinde **LAN Kontrolü** açık olmalı.
 
 [Türkçe kullanım kılavuzu](docs/KULLANIM.md) · [Cihaz sürücüsü tasarımı](docs/DEVICE_DRIVERS.md)
 
