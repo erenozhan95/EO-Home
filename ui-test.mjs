@@ -44,9 +44,21 @@ try {
     await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)
   )
     throw new Error("Horizontal overflow");
+  await page.getByRole("button", { name: /Örnek klima/ }).click();
+  await page.getByRole("heading", { name: "Örnek klima" }).waitFor();
+  const target = page.getByLabel("Klima hedef sıcaklığı");
+  await target.fill("22.5");
+  await target.dispatchEvent("change");
+  await page.getByText("22.5", { exact: true }).waitFor();
+  await page.getByRole("button", { name: "Yüksek" }).click();
+  await page.getByRole("button", { name: "Yüksek" }).evaluate((el) => {
+    if (!el.classList.contains("chosen")) throw new Error("Fan setting did not update");
+  });
+  await page.setViewportSize({ width: 1100, height: 780 });
+  await page.screenshot({ path: "artifacts/ui/climate.png" });
   if (errors.length) throw new Error(errors.join("\n"));
   console.log(
-    "PASS: mono/RGB capability gating, lamp selection, per-lamp presets, rename, themes, minimum width, no browser errors",
+    "PASS: lamp controls, selection, presets, rename, themes, climate demo controls, minimum width, no browser errors",
   );
 } finally {
   await browser.close();

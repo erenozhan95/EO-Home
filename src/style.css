@@ -978,6 +978,101 @@ dd {
     transform: rotate(360deg);
   }
 }
+.device-icon.climate-icon {
+  color: var(--accent);
+  background: var(--selected);
+}
+.climate-badge {
+  padding: 7px 10px;
+  border: 1px solid var(--selected-line);
+  border-radius: 20px;
+  color: var(--accent);
+  font-size: 10px;
+  white-space: nowrap;
+}
+.climate-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 15px;
+}
+.climate-grid .card {
+  min-height: 188px;
+  padding: 22px;
+}
+.climate-hero {
+  position: relative;
+  background: var(--hero);
+}
+.climate-symbol {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  color: var(--accent);
+  background: var(--selected);
+  margin-bottom: 14px;
+}
+.climate-symbol svg {
+  width: 27px;
+  height: 27px;
+}
+.climate-hero h3 {
+  margin: 11px 0 5px;
+  font-size: 22px;
+}
+.climate-hero p,
+.climate-note {
+  color: var(--muted);
+  font-size: 11px;
+}
+.climate-hero .power-button {
+  position: absolute;
+  right: 22px;
+  bottom: 22px;
+}
+.climate-target {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  margin: 24px 0 18px;
+}
+.climate-target strong {
+  font-size: 43px;
+  line-height: 1;
+}
+.climate-target span {
+  color: var(--muted);
+}
+.climate-temperature input {
+  width: 100%;
+  accent-color: var(--accent);
+}
+.climate-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 27px;
+}
+.climate-buttons button {
+  padding: 11px 13px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--hover);
+  color: var(--text);
+  font-size: 11px;
+}
+.climate-buttons button.chosen {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.climate-buttons button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.climate-note {
+  margin: 17px 3px;
+}
 @media (max-width: 950px) {
   .shell {
     grid-template-columns: 195px minmax(0, 1fr);
@@ -1012,6 +1107,9 @@ dd {
   }
   .local-label {
     display: none;
+  }
+  .climate-grid .card {
+    padding: 17px;
   }
   #footer-note {
     display: none;

@@ -84,6 +84,30 @@ pub struct Service {
     pub ip: String,
     pub name: String,
     pub protocol: String,
+    #[serde(default)]
+    pub kind: DeviceKind,
+    #[serde(default)]
+    pub climate: Option<ClimateState>,
+}
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum DeviceKind {
+    Climate,
+    #[default]
+    Other,
+}
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct ClimateState {
+    pub power: bool,
+    pub target_c: f32,
+    pub ambient_c: Option<f32>,
+    pub mode: String,
+    pub fan: String,
+    pub min_c: f32,
+    pub max_c: f32,
+    pub modes: Vec<String>,
+    pub fan_modes: Vec<String>,
+    pub support: Vec<String>,
 }
 #[derive(Clone, Default, Serialize, Deserialize)]
 #[serde(default)]

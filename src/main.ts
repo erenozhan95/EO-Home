@@ -21,6 +21,8 @@ import {
   Thermometer,
   Pencil,
   WifiOff,
+  AirVent,
+  Fan,
 } from "lucide";
 import "./style.css";
 
@@ -42,7 +44,26 @@ type Device = {
   latency_ms: number | null;
   error: string;
 };
-type Service = { id: string; ip: string; name: string; protocol: string };
+type ClimateState = {
+  power: boolean;
+  target_c: number;
+  ambient_c: number | null;
+  mode: string;
+  fan: string;
+  min_c: number;
+  max_c: number;
+  modes: string[];
+  fan_modes: string[];
+  support: string[];
+};
+type Service = {
+  id: string;
+  ip: string;
+  name: string;
+  protocol: string;
+  kind: "climate" | "other";
+  climate: ClimateState | null;
+};
 type Snapshot = {
   devices: Device[];
   services: Service[];
@@ -89,6 +110,8 @@ const iconSet = {
   Thermometer,
   Pencil,
   WifiOff,
+  AirVent,
+  Fan,
 };
 const icons = () =>
   createIcons({ icons: iconSet, attrs: { "stroke-width": 1.7 } });
@@ -104,6 +127,9 @@ const esc = (s: unknown) =>
 const label = (d: Device) =>
   d.alias || d.name || `Ampul ${state.devices.indexOf(d) + 1}`;
 const selected = () => state.devices.find((d) => d.id === current);
+const selectedClimate = () =>
+  state.services.find((s) => s.kind === "climate" && current === `service:${s.id}`);
+const climateServices = () => state.services.filter((s) => s.kind === "climate");
 const supports = (d: Device, method: string) => d.support.includes(method);
 const disabled = (value: boolean) => (value ? "disabled" : "");
 const hex = (n: number) => "#" + n.toString(16).padStart(6, "0");
@@ -112,24 +138,55 @@ const $ = <T extends HTMLElement = HTMLElement>(query: string) =>
 
 $("#app").innerHTML = `
 <header class="titlebar"><div class="brand">${icon("lightbulb")}<b>EO<span>·</span>Light</b><span class="version">5</span></div><div class="window-actions"><span class="local-label">${icon("radio")} Yerel bağlantı</span><button data-action="theme" title="Temayı değiştir" aria-label="Temayı değiştir">${icon("sun")}</button><span class="divider"></span><button data-action="hide" title="Sistem tepsisine küçült" aria-label="Sistem tepsisine küçült">${icon("minus")}</button><button data-action="close" class="close" title="Çıkış" aria-label="Çıkış">${icon("x")}</button></div></header>
-<div class="shell"><aside><div class="sidebar-heading"><span>AMPULLERİM</span><span id="count">0</span></div><div id="devices" role="navigation" aria-label="Ampul seçimi"></div><div class="sidebar-bottom"><div class="connection-summary"><span class="dot"></span><span id="connection-count">Bağlantı bekleniyor</span></div><button class="scan" data-action="scan">${icon("refresh-cw")}<span>Yeniden tara</span></button><p id="scan-time">Açılışta bir kez taranır</p><button class="network-link" data-action="network">${icon("network")} Ağdaki diğer cihazlar <span id="service-count">0</span></button></div></aside>
-<main><div class="page-heading"><div><div class="eyebrow">EVİNİN IŞIĞI, ELİNİN ALTINDA</div><h1>Işık kontrolü</h1></div><span class="connection-mode">${icon("radio")} Aynı anda bağlı</span></div><div id="scan-warning" role="status"></div><section id="panel"></section><footer><span>${icon("monitor")} Yalnızca yerel ağında çalışır</span><span id="footer-note">Cihaz seçmek diğer bağlantıları etkilemez</span></footer></main></div>
+<div class="shell"><aside><div class="sidebar-heading"><span>CİHAZLARIM</span><span id="count">0</span></div><div id="devices" role="navigation" aria-label="Cihaz seçimi"></div><div class="sidebar-bottom"><div class="connection-summary"><span class="dot"></span><span id="connection-count">Bağlantı bekleniyor</span></div><button class="scan" data-action="scan">${icon("refresh-cw")}<span>Yeniden tara</span></button><p id="scan-time">Açılışta bir kez taranır</p><button class="network-link" data-action="network">${icon("network")} Ağdaki diğer cihazlar <span id="service-count">0</span></button></div></aside>
+<main><div class="page-heading"><div><div class="eyebrow">AKILLI EVİN, TEK BİR YERDE</div><h1>Ev kontrolü</h1></div><span class="connection-mode">${icon("radio")} Aynı anda bağlı</span></div><div id="scan-warning" role="status"></div><section id="panel"></section><footer><span>${icon("monitor")} Yalnızca yerel ağında çalışır</span><span id="footer-note">Cihaz seçmek diğer bağlantıları etkilemez</span></footer></main></div>
 <div id="toast" role="status" aria-live="polite"></div><dialog id="dialog"><div id="dialog-body"></div></dialog>`;
 
 function bulb(d: Device) {
   return `<div class="bulb-art ${d.power ? "lit" : ""}" style="--lamp-color:${d.color_mode === 1 ? hex(d.rgb) : d.ct < 3500 ? "#ffd793" : d.ct < 5000 ? "#fff0d0" : "#d8eaff"};--intensity:${d.bright / 100}"><div class="halo"></div><svg viewBox="0 0 180 205" aria-hidden="true"><defs><linearGradient id="glass" x1="0" y1="0" x2="0.8" y2="1"><stop stop-color="currentColor" stop-opacity=".25"/><stop offset="1" stop-color="currentColor" stop-opacity=".04"/></linearGradient></defs><path class="bulb-glass" d="M90 19c-33 0-57 24-57 55 0 25 15 36 26 52 5 7 7 14 7 24h48c0-10 2-17 7-24 11-16 26-27 26-52 0-31-24-55-57-55Z"/><path class="filament" d="m72 86 18 17 18-17m-18 17v47"/><path class="shine" d="M51 73c0-22 17-39 39-39"/><path class="base" d="M67 153h46v13H67zm3 15h40v12H70z"/><path class="tip" d="M77 184h26c-1 9-25 9-26 0Z"/></svg><div class="platform"></div></div>`;
 }
 
+const modeLabel = (mode: string) =>
+  ({ cool: "Soğutma", heat: "Isıtma", auto: "Otomatik", fan: "Fan", dry: "Nem alma" })[
+    mode as "cool" | "heat" | "auto" | "fan" | "dry"
+  ] || mode;
+const fanLabel = (fan: string) =>
+  ({ auto: "Otomatik", low: "Düşük", medium: "Orta", high: "Yüksek" })[
+    fan as "auto" | "low" | "medium" | "high"
+  ] || fan;
+function renderClimatePanel(service: Service) {
+  const climate = service.climate;
+  const has = (feature: string) => !!climate?.support.includes(feature);
+  const modes = climate?.modes || ["cool", "heat", "auto", "fan"];
+  const fans = climate?.fan_modes || ["auto", "low", "medium", "high"];
+  const target = climate?.target_c ?? 24;
+  $("#panel").innerHTML = `
+    <div class="selected-heading"><div><h2>${esc(service.name)}</h2><span class="model">Klima <span>·</span> ${esc(service.protocol)}</span></div><span class="climate-badge">${climate ? "Kontrol hazır" : "Sürücü gerekli"}</span></div>
+    ${climate ? "" : `<div class="offline-banner">${icon("wifi-off")}<span>Cihaz klima/termostat türü duyurdu. Sıcaklık, mod ve fan komutları için bu modelin yerel kontrol sürücüsü gerekir; şu anda cihazına komut gönderilmiyor.</span></div>`}
+    <div class="climate-grid">
+      <section class="card climate-hero"><div class="climate-symbol">${icon("air-vent")}</div><div class="card-label">KLİMA DURUMU</div><h3>${climate ? (climate.power ? "Açık" : "Kapalı") : "Durum bilinmiyor"}</h3><p>${climate?.ambient_c == null ? "Oda sıcaklığı okunamadı" : `Oda sıcaklığı ${climate.ambient_c.toFixed(1)} °C`}</p><button class="power-button ${climate?.power ? "active" : ""}" data-action="climate-power" aria-label="Klimayı aç veya kapat" ${disabled(!has("power") || pending.has(`service:${service.id}`))}>${icon("power")}</button></section>
+      <section class="card climate-temperature"><div class="card-label">${icon("thermometer")} HEDEF SICAKLIK</div><div class="climate-target"><strong id="climate-target-number">${climate ? target.toFixed(1) : "—"}</strong><span>°C</span></div><input id="climate-temperature" type="range" aria-label="Klima hedef sıcaklığı" min="${climate?.min_c ?? 16}" max="${climate?.max_c ?? 30}" step="0.5" value="${target}" ${disabled(!has("target_temperature"))}><div class="range-labels"><span>${climate?.min_c ?? 16} °C</span><span>${climate?.max_c ?? 30} °C</span></div></section>
+      <section class="card climate-options"><div class="card-label">${icon("air-vent")} ÇALIŞMA MODU</div><div class="climate-buttons">${modes.map((mode) => `<button data-action="climate-mode" data-value="${esc(mode)}" class="${climate?.mode === mode ? "chosen" : ""}" ${disabled(!has("mode") || pending.has(`service:${service.id}`))}>${esc(modeLabel(mode))}</button>`).join("")}</div></section>
+      <section class="card climate-options"><div class="card-label">${icon("fan")} FAN HIZI</div><div class="climate-buttons">${fans.map((fan) => `<button data-action="climate-fan" data-value="${esc(fan)}" class="${climate?.fan === fan ? "chosen" : ""}" ${disabled(!has("fan_speed") || pending.has(`service:${service.id}`))}>${esc(fanLabel(fan))}</button>`).join("")}</div></section>
+    </div>
+    <p class="climate-note">${climate ? "Yalnızca cihazın bildirdiği desteklenen ayarlar kullanılabilir." : "Ağda bulunması, doğrudan kontrol edilebileceği anlamına gelmez."}</p>`;
+}
 function renderSidebar() {
-  $("#count").textContent = String(state.devices.length);
+  $("#count").textContent = String(state.devices.length + climateServices().length);
   $("#devices").innerHTML =
-    state.devices
+    (state.devices
       .map(
         (d) =>
           `<button class="device ${d.id === current ? "selected" : ""}" data-action="select" data-id="${esc(d.id)}" aria-pressed="${d.id === current}"><span class="device-icon ${d.power && d.connected ? "on" : ""}">${icon("lightbulb")}</span><span class="device-copy"><b>${esc(label(d))}</b><small><span class="dot ${d.connected ? "online" : "offline"}"></span>${d.connected ? (d.power ? "Açık · %" + d.bright : "Kapalı · Bağlı") : "Çevrimdışı"}</small></span>${icon("chevron-right")}</button>`,
       )
-      .join("") ||
-    `<div class="empty-sidebar">${icon("lightbulb")}<p>${state.scanning ? "Ampuller aranıyor…" : "Henüz ampul bulunamadı"}</p></div>`;
+      .join("") +
+      climateServices()
+        .map(
+          (s) =>
+            `<button class="device ${current === `service:${s.id}` ? "selected" : ""}" data-action="select" data-id="${esc(`service:${s.id}`)}" aria-pressed="${current === `service:${s.id}`}"><span class="device-icon climate-icon">${icon("air-vent")}</span><span class="device-copy"><b>${esc(s.name)}</b><small><span class="dot ${s.climate ? "online" : "offline"}"></span>${s.climate ? "Klima · Kontrol hazır" : "Klima · Sürücü gerekli"}</small></span>${icon("chevron-right")}</button>`,
+        )
+        .join("")) ||
+    `<div class="empty-sidebar">${icon("network")}<p>${state.scanning ? "Cihazlar aranıyor…" : "Henüz cihaz bulunamadı"}</p></div>`;
   const online = state.devices.filter((d) => d.connected).length;
   $("#connection-count").textContent =
     `${online} / ${state.devices.length} ampul bağlı`;
@@ -160,9 +217,15 @@ function renderPanel(force = false) {
   const focusId =
     sameDevice && focus && $("#panel").contains(focus) ? focus.id : "";
   const d = selected();
+  const climate = selectedClimate();
+  if (climate) {
+    renderClimatePanel(climate);
+    $("#panel").dataset.device = current;
+    return;
+  }
   if (!d) {
     $("#panel").innerHTML =
-      `<div class="empty-state">${icon("lightbulb")}<h2>${state.scanning ? "Işıklarını buluyoruz" : "Ampulünü bulalım"}</h2><p>${state.scanning ? "Ağdaki uyumlu ampuller burada görünecek." : "Bilgisayar ve ampul aynı ağda, ampulün LAN kontrolü açık olmalı. Ardından Yeniden tara’ya bas."}</p></div>`;
+      `<div class="empty-state">${icon("lightbulb")}<h2>${state.scanning ? "Cihazlar aranıyor" : "Cihazlarını bulalım"}</h2><p>${state.scanning ? "Ağdaki uyumlu cihazlar burada görünecek." : "Bilgisayar ve ampul aynı ağda, ampulün LAN kontrolü açık olmalı. Ardından Yeniden tara’ya bas."}</p></div>`;
     return;
   }
   const draft = drafts.get(d.id) || {};
@@ -202,7 +265,11 @@ function render(force = false) {
 }
 function accept(next: Snapshot) {
   state = next;
-  if (!current || !state.devices.some((d) => d.id === current))
+  if (
+    !current ||
+    (!state.devices.some((d) => d.id === current) &&
+      !state.services.some((s) => current === `service:${s.id}`))
+  )
     current = state.selected || state.devices[0]?.id || "";
   render();
 }
@@ -243,13 +310,29 @@ async function change(action: string, value: number) {
     render(true);
   }
 }
+async function changeClimate(action: string, value: number | string | boolean) {
+  const service = selectedClimate();
+  if (!service?.climate) return;
+  const key = `service:${service.id}`;
+  pending.add(key);
+  render();
+  try {
+    await call("control_climate", { id: service.id, action, value });
+  } catch (error) {
+    toast(String(error), true);
+  } finally {
+    pending.delete(key);
+    render(true);
+  }
+}
 async function action(button: HTMLButtonElement) {
   const a = button.dataset.action,
     d = selected();
   if (a === "select") {
     current = button.dataset.id!;
     render(true);
-    await call("select_device", { id: current });
+    if (!current.startsWith("service:"))
+      await call("select_device", { id: current });
     return;
   }
   if (a === "scan") {
@@ -277,6 +360,16 @@ async function action(button: HTMLButtonElement) {
   }
   if (a === "network") {
     showNetwork();
+    return;
+  }
+  const climate = selectedClimate();
+  if (climate?.climate) {
+    if (a === "climate-power")
+      await changeClimate("power", !climate.climate.power);
+    if (a === "climate-mode")
+      await changeClimate("mode", String(button.dataset.value));
+    if (a === "climate-fan")
+      await changeClimate("fan_speed", String(button.dataset.value));
     return;
   }
   if (!d) return;
@@ -325,6 +418,10 @@ document.addEventListener("click", (e) => {
 document.addEventListener("input", (e) => {
   const el = e.target as HTMLInputElement,
     d = selected();
+  if (el.id === "climate-temperature") {
+    $("#climate-target-number").textContent = Number(el.value).toFixed(1);
+    return;
+  }
   if (!d) return;
   const draft = drafts.get(d.id) || {};
   if (el.id === "brightness") {
@@ -340,6 +437,8 @@ document.addEventListener("input", (e) => {
 });
 document.addEventListener("change", (e) => {
   const el = e.target as HTMLInputElement;
+  if (el.id === "climate-temperature")
+    void changeClimate("target_temperature", Number(el.value));
   if (el.id === "brightness") void change("brightness", Number(el.value));
   if (el.id === "temperature") void change("temperature", Number(el.value));
   if (el.id === "color") void change("color", parseInt(el.value.slice(1), 16));
@@ -375,13 +474,14 @@ function showDetails(d: Device) {
 }
 function showNetwork() {
   showDialog(
-    `<div class="dialog-heading"><h2>Ağdaki diğer cihazlar</h2>${dialogClose()}</div><p class="dialog-note">Son taramanın sonuçları. Bu cihazlar keşfedildi; kontrol için markaya uygun bağlantı desteği gerekir.</p><div class="service-list">${state.services.map((d) => `<div class="service">${icon("network")}<div><b>${esc(d.name)}</b><small>${esc(d.protocol)} · ${esc(d.ip)}</small></div></div>`).join("") || "<p>Son taramada ek cihaz bulunamadı.</p>"}</div>`,
+    `<div class="dialog-heading"><h2>Ağdaki diğer cihazlar</h2>${dialogClose()}</div><p class="dialog-note">Son taramanın sonuçları. Cihaz türü yalnızca açıkça duyuruluyorsa tanınır; kontrol için markaya uygun bağlantı desteği gerekir.</p><div class="service-list">${state.services.map((d) => `<div class="service">${icon(d.kind === "climate" ? "air-vent" : "network")}<div><b>${esc(d.name)}</b><small>${d.kind === "climate" ? "Klima/termostat · " : ""}${esc(d.protocol)} · ${esc(d.ip)}</small></div></div>`).join("") || "<p>Son taramada ek cihaz bulunamadı.</p>"}</div>`,
   );
 }
 
 // Explicit development-only preview. Never enabled in the packaged application.
 function demoCall(method: string, args: Record<string, unknown>) {
   const d = state.devices.find((d) => d.id === args.id);
+  const climate = state.services.find((s) => s.id === args.id)?.climate;
   if (method === "snapshot") return state;
   if (method === "select_device") state.selected = String(args.id);
   if (method === "set_theme") state.theme = String(args.theme);
@@ -400,6 +500,12 @@ function demoCall(method: string, args: Record<string, unknown>) {
       d.color_mode = 1;
     }
     d.latency_ms = 28;
+  }
+  if (method === "control_climate" && climate) {
+    if (args.action === "power") climate.power = Boolean(args.value);
+    if (args.action === "target_temperature") climate.target_c = Number(args.value);
+    if (args.action === "mode") climate.mode = String(args.value);
+    if (args.action === "fan_speed") climate.fan = String(args.value);
   }
   if (method === "apply_preset" && d) {
     d.power = true;
@@ -463,7 +569,26 @@ async function init() {
     state.selected = "one";
     state.last_scan = Date.now() / 1000;
     state.services = [
-      { id: "tv", ip: "198.51.100.12", name: "Salon TV", protocol: "mDNS" },
+      { id: "tv", ip: "198.51.100.12", name: "Salon TV", protocol: "mDNS", kind: "other", climate: null },
+      {
+        id: "sample-climate",
+        ip: "203.0.113.8",
+        name: "Örnek klima",
+        protocol: "Örnek sürücü",
+        kind: "climate",
+        climate: {
+          power: true,
+          target_c: 23.5,
+          ambient_c: 25.1,
+          mode: "cool",
+          fan: "auto",
+          min_c: 16,
+          max_c: 30,
+          modes: ["cool", "heat", "auto", "fan", "dry"],
+          fan_modes: ["auto", "low", "medium", "high"],
+          support: ["power", "target_temperature", "mode", "fan_speed"],
+        },
+      },
     ];
     current = "one";
     render(true);

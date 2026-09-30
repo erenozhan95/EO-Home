@@ -1,6 +1,6 @@
 //! Discovery is invoked only by startup and an explicit user rescan.
 //! Yeelight UDP search follows EmreOzhan/smart-gadget (MIT); see attribution.
-use crate::model::{Device, Service};
+use crate::model::{Device, DeviceKind, Service};
 use std::{
     collections::{BTreeMap, HashMap},
     net::{Ipv4Addr, SocketAddr},
@@ -22,6 +22,25 @@ fn headers(text: &str) -> HashMap<String, String> {
         .filter_map(|l| l.split_once(':'))
         .map(|(k, v)| (k.trim().to_ascii_lowercase(), v.trim().to_string()))
         .collect()
+}
+fn advertised_kind(value: &str) -> DeviceKind {
+    let value = value.to_ascii_lowercase();
+    if [
+        "airconditioner",
+        "air_conditioner",
+        "air-conditioner",
+        "aircon",
+        "thermostat",
+        "hvac",
+        "_climate._",
+    ]
+    .iter()
+    .any(|word| value.contains(word))
+    {
+        DeviceKind::Climate
+    } else {
+        DeviceKind::Other
+    }
 }
 pub fn parse_light(text: &str, source: Ipv4Addr) -> Option<Device> {
     let h = headers(text);
@@ -63,6 +82,12 @@ fn parse_service(text: &str, source: Ipv4Addr) -> Option<Service> {
         ip: source.to_string(),
         name,
         protocol: "SSDP / UPnP".into(),
+        kind: h
+            .get("st")
+            .or(h.get("nt"))
+            .map(|value| advertised_kind(value))
+            .unwrap_or_default(),
+        climate: None,
     })
 }
 pub async fn scan() -> Scan {
@@ -113,7 +138,10 @@ pub async fn scan() -> Scan {
                 host.protocol.push_str(" + ");
                 host.protocol.push_str(&service.protocol);
             }
-            if service.protocol == "mDNS" {
+            if service.kind == DeviceKind::Climate {
+                host.kind = DeviceKind::Climate;
+                host.name = service.name;
+            } else if service.protocol == "mDNS" && host.kind == DeviceKind::Other {
                 host.name = service.name;
             }
         } else {
@@ -191,12 +219,18 @@ fn scan_mdns() -> Scan {
         "_matter._tcp.local.",
         "_shelly._tcp.local.",
         "_ewelink._tcp.local.",
+        "_aircon._tcp.local.",
+        "_thermostat._tcp.local.",
+        "_climate._tcp.local.",
     ];
-    let receivers: Vec<_> = types.iter().filter_map(|t| daemon.browse(t).ok()).collect();
+    let receivers: Vec<_> = types
+        .iter()
+        .filter_map(|t| daemon.browse(t).ok().map(|rx| (*t, rx)))
+        .collect();
     let until = std::time::Instant::now() + Duration::from_secs(4);
     let mut found = BTreeMap::new();
     while std::time::Instant::now() < until {
-        for rx in &receivers {
+        for (service_type, rx) in &receivers {
             while let Ok(event) = rx.try_recv() {
                 if let ServiceEvent::ServiceResolved(info) = event {
                     if let Some(ip) = info.get_addresses().iter().find(|ip| ip.is_ipv4()) {
@@ -213,6 +247,8 @@ fn scan_mdns() -> Scan {
                                     .unwrap_or("Ağ cihazı")
                                     .to_string(),
                                 protocol: "mDNS".into(),
+                                kind: advertised_kind(service_type),
+                                climate: None,
                             },
                         );
                     }
@@ -240,5 +276,15 @@ mod tests {
         assert_eq!(d.bright, 42);
         assert!(!d.supports("set_rgb"));
         assert!(parse_light(t, "203.0.113.6".parse().unwrap()).is_none());
+    }
+    #[test]
+    fn classifies_only_explicit_climate_advertisements() {
+        let source = "203.0.113.7".parse().unwrap();
+        let climate = "HTTP/1.1 200 OK\r\nUSN: uuid:test::urn:example:device:Thermostat:1\r\nST: urn:example:device:Thermostat:1\r\nSERVER: Test device\r\n";
+        assert_eq!(parse_service(climate, source).unwrap().kind, DeviceKind::Climate);
+        let generic = "HTTP/1.1 200 OK\r\nUSN: uuid:test::upnp:rootdevice\r\nST: upnp:rootdevice\r\nSERVER: Smart climate company\r\n";
+        assert_eq!(parse_service(generic, source).unwrap().kind, DeviceKind::Other);
+        assert_eq!(advertised_kind("_thermostat._tcp.local."), DeviceKind::Climate);
+        assert_eq!(advertised_kind("_matter._tcp.local."), DeviceKind::Other);
     }
 }

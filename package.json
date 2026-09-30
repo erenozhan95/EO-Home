@@ -4,8 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite --host 127.0.0.1",
-    "build": "tsc && vite build",
+    "dev": "vite --configLoader native --host 127.0.0.1",
+    "build": "tsc && vite build --configLoader native",
     "tauri": "tauri"
   },
   "dependencies": {

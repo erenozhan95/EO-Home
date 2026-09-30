@@ -3,6 +3,11 @@
 EO-Light, aynı yerel ağdaki desteklenen ampulleri bilgisayarından yönetir.
 Ampuller arasında seçim yaparken diğerlerinin bağlantısı açık kalır.
 
+Uygulama açıkça klima/termostat türü duyuran bazı ağ cihazlarını da ayrı bir
+sayfada gösterebilir. Bu aşamada gerçek klimayı kontrol eden sürücü yoktur;
+model için sürücü eklenene kadar sıcaklık, mod ve fan ayarları pasif görünür.
+Yalnızca ağda görünmesi cihazın uzaktan kontrol edilebileceği anlamına gelmez.
+
 ## Başlangıç
 
 1. **EO-Light.exe** dosyasını aç.

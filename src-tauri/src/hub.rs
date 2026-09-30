@@ -1,7 +1,8 @@
 use crate::{
+    climate::{self, ClimateCommand},
     connection::{self, Handle, Update},
     discovery,
-    model::{self, Config, Device, Snapshot},
+    model::{self, Config, Device, DeviceKind, Snapshot},
 };
 use std::{
     collections::HashMap,
@@ -204,6 +205,38 @@ impl Hub {
             .cloned()
             .ok_or("Bağlantı bulunamadı.")?;
         connection::send(&handle, command).await
+    }
+    pub fn control_climate(
+        &self,
+        id: &str,
+        action: &str,
+        value: serde_json::Value,
+    ) -> Result<(), String> {
+        let data = self.data.lock().unwrap();
+        let service = data
+            .services
+            .iter()
+            .find(|service| service.id == id && service.kind == DeviceKind::Climate)
+            .ok_or("Klima bulunamadı.")?;
+        let state = service
+            .climate
+            .as_ref()
+            .ok_or("Bu klima için yerel kontrol sürücüsü henüz yok.")?;
+        let command = match action {
+            "power" => ClimateCommand::Power(value.as_bool().ok_or("Geçersiz güç değeri.")?),
+            "target_temperature" => ClimateCommand::TargetTemperature(
+                value.as_f64().ok_or("Geçersiz sıcaklık değeri.")? as f32,
+            ),
+            "mode" => ClimateCommand::Mode(
+                value.as_str().ok_or("Geçersiz çalışma modu.")?.into(),
+            ),
+            "fan_speed" => ClimateCommand::Fan(
+                value.as_str().ok_or("Geçersiz fan hızı.")?.into(),
+            ),
+            _ => return Err("Bilinmeyen klima komutu.".into()),
+        };
+        climate::validate(state, command)?;
+        Err("Bu klima için komut gönderebilen bir sürücü henüz bağlı değil.".into())
     }
     pub async fn preset(&self, id: &str, slot: usize) -> Result<u64, String> {
         let value = {

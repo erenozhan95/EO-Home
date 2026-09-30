@@ -34,6 +34,15 @@ async fn control(
     hub.control(&id, &action, value).await
 }
 #[tauri::command]
+fn control_climate(
+    hub: State<Shared>,
+    id: String,
+    action: String,
+    value: serde_json::Value,
+) -> Result<(), String> {
+    hub.control_climate(&id, &action, value)
+}
+#[tauri::command]
 async fn apply_preset(hub: State<'_, Shared>, id: String, slot: usize) -> Result<u64, String> {
     hub.preset(&id, slot).await
 }
@@ -136,6 +145,7 @@ fn main() {
             snapshot,
             rescan,
             control,
+            control_climate,
             apply_preset,
             select_device,
             save_preset,
