@@ -1,12 +1,10 @@
 # EO-Home 5 — Kullanım kılavuzu
 
-EO-Home, aynı yerel ağdaki desteklenen ampulleri bilgisayarından yönetir.
-Ampuller arasında seçim yaparken diğerlerinin bağlantısı açık kalır.
-
-Uygulama açıkça klima/termostat türü duyuran bazı ağ cihazlarını da ayrı bir
-sayfada gösterebilir. Bu aşamada gerçek klimayı kontrol eden sürücü yoktur;
-model için sürücü eklenene kadar sıcaklık, mod ve fan ayarları pasif görünür.
-Yalnızca ağda görünmesi cihazın uzaktan kontrol edilebileceği anlamına gelmez.
+EO-Home, yerel ağındaki akıllı cihazları tek pencerede toplar. Yeelight LAN
+ampullerini aktif olarak yönetir; seçmediğin ampullerin bağlantısı açık kalır.
+Açıkça klima/termostat türü duyuran cihazlar kendi sayfasında görünür.
+Klima için sıcaklık, çalışma modu ve fan arayüzü hazırdır; gerçek bir klimayı
+kontrol edecek sürücü henüz eklenmedi.
 
 ## Başlangıç
 
@@ -40,6 +38,19 @@ Uygulamadan ışığı kapatmak bağlantıyı kapatmaz.
 
 “Son komut yanıtı” süresi, ampulün ağ üzerinden verdiği yanıtın süresidir;
 fiziksel ışık geçişinin ölçümü değildir. Aç/kapat komutunda ek geçiş animasyonu yoktur.
+
+## Klima ve diğer akıllı cihazlar
+
+- Bir klima/termostat kendini desteklenen SSDP veya mDNS türüyle duyurursa
+  **Cihazlarım** listesinde ayrı bir kart olarak görünür. Kartı seçerek klima
+  durumunu, hedef sıcaklık, çalışma modu ve fan hızı alanlarını görebilirsin.
+- Gerçek cihaz sürücüsü eklenene kadar bu alanlar pasiftir; uygulama klimaya
+  komut göndermez. Geliştirme önizlemesindeki örnek klima yalnızca arayüz
+  denemesi içindir.
+- **Ağdaki diğer cihazlar** penceresi keşfedilen ek servisleri gösterir.
+  Bu listede görünmek, cihazın kontrol edilebildiği anlamına gelmez.
+- Bir klima veya başka marka cihazın aktif kontrolü için marka/modeline uygun
+  yerel protokol veya eşleştirme desteği gerekir.
 
 ## Dört hızlı ayar
 

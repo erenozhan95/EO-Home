@@ -1,6 +1,6 @@
-# EO-Home · Akıllı ev altyapısı
+# EO-Home · Yerel akıllı ev kontrolü
 
-Windows için yerel ağda birden fazla akıllı ampulü yöneten masaüstü uygulaması. Ampullere ayrı bağlantılar kurar; soldan seçtiğin ampulün güç, parlaklık ve desteklediği renk ayarlarını sağdaki panelden değiştirirsin.
+EO-Home, evdeki akıllı cihazları tek bir Windows uygulamasında görmeyi ve desteklenenleri yerel ağ üzerinden yönetmeyi amaçlar. Şu anda birden fazla **Yeelight LAN ampulünü aktif olarak kontrol eder**. Klima/termostat türünü açıkça duyuran cihazlar için ayrı bir ekran, sıcaklık–mod–fan arayüzü ve komut doğrulama altyapısı vardır; **gerçek bir klimaya komut gönderen sürücü henüz yoktur**.
 
 Bu depo ilk commit'inde **LightController 4.1** adlı C# sürümünü içeriyordu. Rust/Tauri sürümü önce **EO-Light 5** adıyla geliştirildi; güncel uygulamanın adı **EO-Home**. Eski sürümün kaynakları ve derleme betikleri güncel proje ağacından çıkarılmıştır.
 
@@ -8,7 +8,17 @@ Bu depo ilk commit'inde **LightController 4.1** adlı C# sürümünü içeriyord
 
 Güncel derlemenin `EO-Home-windows` dosyasını [Windows build and tests](https://github.com/erenozhan95/EO-Home/actions/workflows/windows.yml) iş akışının başarılı son çalışmasından indir. İçinde `EO-Home.exe` ve `KULLANIM.md` bulunur. Windows 10/11 x64 ve WebView2 gerekir. Ampullerle bilgisayar aynı yerel ağda olmalı; Yeelight ampullerinde **LAN Kontrolü** açık olmalı. [Releases](https://github.com/erenozhan95/EO-Home/releases) sayfasındaki önceki paketler eski adı taşıyabilir.
 
-[Türkçe kullanım kılavuzu](docs/KULLANIM.md)
+[Türkçe kullanım kılavuzu](docs/KULLANIM.md) · [Cihaz sürücüsü tasarımı](docs/DEVICE_DRIVERS.md)
+
+## Cihaz desteği
+
+| Cihaz | Ağda bulma | Uygulamadan kontrol |
+| --- | --- | --- |
+| Yeelight LAN ampuller | Otomatik keşif ve IP değişince yeniden tarama | Aktif: aç/kapat, parlaklık; cihaz destekliyorsa RGB ve beyaz tonu |
+| Klima / termostat | SSDP veya mDNS ile türünü açıkça duyuruyorsa ayrı cihaz sayfası | Sıcaklık, çalışma modu ve fan arayüzü hazır; gerçek cihaz sürücüsü eklenene kadar kontroller pasif |
+| Diğer akıllı ağ cihazları | Desteklenen SSDP/mDNS duyuruları listelenir | Markaya ve protokole uygun sürücü gerektiği için şimdilik kontrol yok |
+
+Örneğin birden fazla ampulü aynı anda bağlı tutup soldan seçtiğinin parlaklığını değiştirebilirsin. Bir klima açıkça tanınırsa kendi sayfasında görünür; modeline uygun yerel bağlantı desteği eklenmeden sıcaklık veya fan komutu gönderilmez. Her cihazın ağda bulunması, otomatik olarak kontrol edilebildiği anlamına gelmez.
 
 ## Özellikler
 
@@ -20,7 +30,7 @@ Güncel derlemenin `EO-Home-windows` dosyasını [Windows build and tests](https
 - Cihaz adı değiştirme, koyu/açık tema ve sistem tepsisine küçültme.
 - Cihaz kimliğiyle eşleştirme; IP değiştiğinde isteğe bağlı yeni taramada güncelleme.
 - SSDP/UPnP ve belirli mDNS servislerini listeler. Bu cihazlar için genel kontrol sürücüsü bulunmaz.
-- Açıkça klima/termostat türü duyuran ağ cihazlarını ayrı sayfada gösterir. Kontroller, o cihaz için yerel sürücü eklenene kadar pasiftir.
+- Açıkça klima/termostat türü duyuran ağ cihazlarını ayrı sayfada gösterir. Sıcaklık, çalışma modu ve fan ayarları modelin desteklediği özelliklere göre kullanılmak üzere hazırlanmıştır.
 
 ## Teknolojiler
 
@@ -31,7 +41,7 @@ Güncel derlemenin `EO-Home-windows` dosyasını [Windows build and tests](https
 | Yerel servis | Rust, Tokio | Keşif, bağımsız TCP bağlantıları ve komutlar |
 | Veri | JSON | Cihaz adları, seçim, tema ve parlaklık kayıtları |
 
-Işık kontrolü için bulut hesabı veya uygulamaya ait bir sunucu gerekmez. Şu anki doğrudan kontrol sürücüsü **Yeelight LAN** protokolünü destekler. Klima ekranı ve komut doğrulama altyapısı hazırdır; gerçek bir klimaya komut gönderen sürücü henüz yoktur. Diğer markalar ağ keşfinde görünebilir; kontrol için kendi protokollerine uygun sürücü ve gerekirse eşleştirme eklenmelidir. [Cihaz sürücüsü tasarımı](docs/DEVICE_DRIVERS.md)
+Işık kontrolü için bulut hesabı veya uygulamaya ait bir sunucu gerekmez. Yeni cihaz türlerinin gerçekten kontrol edilebilmesi için ilgili markanın yerel protokolü veya Matter eşleştirmesi, durum okuma ve komut sürücüsü eklenmelidir.
 
 ## Kaynak koddan derleme
 
