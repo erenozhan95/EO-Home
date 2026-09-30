@@ -1,6 +1,6 @@
 # Cihaz türleri ve kontrol sürücüleri
 
-EO-Light, **keşif** ile **kontrolü** ayrı tutar. Ağ taraması bir servisin adresini ve
+EO-Home, **keşif** ile **kontrolü** ayrı tutar. Ağ taraması bir servisin adresini ve
 duyurduğu türü bulabilir; tek başına komut protokolünü veya cihazın gerçekten
 desteklediği özellikleri kanıtlamaz.
 

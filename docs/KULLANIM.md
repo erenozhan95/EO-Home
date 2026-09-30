@@ -1,6 +1,6 @@
-# EO-Light 5 — Kullanım kılavuzu
+# EO-Home 5 — Kullanım kılavuzu
 
-EO-Light, aynı yerel ağdaki desteklenen ampulleri bilgisayarından yönetir.
+EO-Home, aynı yerel ağdaki desteklenen ampulleri bilgisayarından yönetir.
 Ampuller arasında seçim yaparken diğerlerinin bağlantısı açık kalır.
 
 Uygulama açıkça klima/termostat türü duyuran bazı ağ cihazlarını da ayrı bir
@@ -10,9 +10,9 @@ Yalnızca ağda görünmesi cihazın uzaktan kontrol edilebileceği anlamına ge
 
 ## Başlangıç
 
-1. **EO-Light.exe** dosyasını aç.
+1. **EO-Home.exe** dosyasını aç.
 2. Uygulama açılışta ağı bir kez tarar. Birkaç saniye içinde bulunan ampuller
-   soldaki **Ampullerim** listesine eklenir ve her birine ayrı bağlantı kurulur.
+   soldaki **Cihazlarım** listesine eklenir ve her birine ayrı bağlantı kurulur.
 3. Kontrol etmek istediğin ampule tıkla. Sağdaki panel yalnızca o ampule aittir.
 
 Bilgisayar ve ampuller aynı yerel ağda bulunmalı. Yeelight ampullerinde
@@ -25,7 +25,7 @@ Uygulamadan ışığı kapatmak bağlantıyı kapatmaz.
 - Seçim yapmak diğer ampulleri kapatmaz veya bağlantılarını kesmez.
 - Seçili ampulün başlığındaki **ayar simgesinden** adını değiştirebilirsin:
   örneğin “Çalışma lambası”, “Masa lambası”.
-- İsimler EO-Light içinde saklanır; ampulün diğer uygulamalardaki adı değişmez.
+- İsimler EO-Home içinde saklanır; ampulün diğer uygulamalardaki adı değişmez.
 - IP adresi ve cihaz kimliği yalnızca bu ayrıntı penceresinde gösterilir.
 
 ## Işık kontrolü
@@ -77,17 +77,19 @@ kontrolü için ayrıca o markaya uygun bağlantı desteği gerekir.
 - **—** düğmesi uygulamayı saatin yanındaki sistem tepsisine gizler.
   Bağlantılar açık kalır.
 - Tepsideki lamba simgesine çift tıklayarak pencereyi yeniden açabilirsin.
-  Sağ tık menüsünde **EO-Light’ı aç** ve **Çıkış** bulunur.
+  Sağ tık menüsünde **EO-Home’u aç** ve **Çıkış** bulunur.
 - **×** düğmesi uygulamadan çıkar.
 
 ## Dosyalar
 
 ```text
-EO-Light.exe             Uygulama
+EO-Home.exe             Uygulama
 KULLANIM.md              Bu kılavuz
 Ayarlar/                 İlk çalıştırmada oluşur
   eo-light-v5.json       Ampuller, adlar, kayıtlar, seçim ve tema
 ```
+
+Eski tercihleri korumak için ayar dosyasının adı değişmedi.
 
 Klasörü yazılabilir bir konumda tut. Taşırken `Ayarlar` klasörünü de taşırsan
 tercihlerin korunur. Eski uygulamanın `Ayarlar/ayarlar.json` dosyası yeni
@@ -99,7 +101,7 @@ ilk açılışta eski ampul ve dört parlaklık kaydı içe alınır. Eski dosya
 1. Ampulün fiziksel elektriğini, Wi-Fi bağlantısını ve LAN kontrolünü kontrol et.
 2. Bilgisayarı ve ampulü aynı yerel ağa bağla. Misafir ağı istemcileri ayırabilir.
 3. **Yeniden tara** düğmesine bas.
-4. Windows güvenlik duvarında EO-Light için özel ağ erişimine izin verildiğini kontrol et.
+4. Windows güvenlik duvarında EO-Home için özel ağ erişimine izin verildiğini kontrol et.
 
 Uygulama Windows 10/11 x64 ve WebView2 çalışma zamanı kullanır.
 Kontroller bulut hesabına ihtiyaç duymaz; iletişim yerel ağ üzerinden yapılır.

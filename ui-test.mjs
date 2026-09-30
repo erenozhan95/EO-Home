@@ -10,6 +10,10 @@ const errors = [];
 page.on("pageerror", (e) => errors.push(String(e)));
 try {
   await page.goto("http://127.0.0.1:5173/?demo");
+  if ((await page.title()) !== "EO-Home")
+    throw new Error("Application title is not EO-Home");
+  if ((await page.locator(".brand b").innerText()) !== "EO·Home")
+    throw new Error("Application brand is not EO-Home");
   await page.getByRole("heading", { name: "Çalışma lambası", exact: true }).waitFor();
   if (!(await page.getByLabel("Özel renk seç").isDisabled()))
     throw new Error("Mono RGB enabled");

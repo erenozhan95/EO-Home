@@ -3,6 +3,7 @@ Ayarlar/
 **/Ayarlar/
 ayarlar.json
 eo-light-v5.json
+eo-home.json
 diagnostics.json
 *.local.json
 .env

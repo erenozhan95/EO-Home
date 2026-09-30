@@ -32,9 +32,9 @@ jobs:
       - name: Upload Windows application
         uses: actions/upload-artifact@v4
         with:
-          name: EO-Light-5-windows
+          name: EO-Home-windows
           path: |
-            src-tauri/target/release/EO-Light.exe
+            src-tauri/target/release/EO-Home.exe
             docs/KULLANIM.md
             LICENSE
             THIRD_PARTY_NOTICES.md

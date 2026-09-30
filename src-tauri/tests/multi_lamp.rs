@@ -1,4 +1,4 @@
-use eo_light::{hub::Hub, model::Device};
+use eo_home::{hub::Hub, model::Device};
 use serde_json::{json, Value};
 use std::sync::{
     atomic::{AtomicUsize, Ordering},

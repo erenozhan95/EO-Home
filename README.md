@@ -1,12 +1,12 @@
-# EO-Light 5 · Akıllı ev altyapısı
+# EO-Home · Akıllı ev altyapısı
 
 Windows için yerel ağda birden fazla akıllı ampulü yöneten masaüstü uygulaması. Ampullere ayrı bağlantılar kurar; soldan seçtiğin ampulün güç, parlaklık ve desteklediği renk ayarlarını sağdaki panelden değiştirirsin.
 
-Bu depo ilk commit'inde **LightController 4.1** adlı C# sürümünü içeriyordu. İkinci commit'ten itibaren ana uygulama **EO-Light 5**'tir. Eski sürümün kaynakları ve derleme betikleri güncel proje ağacından çıkarılmıştır.
+Bu depo ilk commit'inde **LightController 4.1** adlı C# sürümünü içeriyordu. Rust/Tauri sürümü önce **EO-Light 5** adıyla geliştirildi; güncel uygulamanın adı **EO-Home**. Eski sürümün kaynakları ve derleme betikleri güncel proje ağacından çıkarılmıştır.
 
 ## İndir ve kullan
 
-[Releases](https://github.com/erenozhan95/EO-Home/releases) sayfasındaki `EO-Light-5-windows.zip` dosyasını indirip çıkar. `EO-Light.exe` ve `KULLANIM.md` aynı klasörde bulunur. Windows 10/11 x64 ve WebView2 gerekir. Ampullerle bilgisayar aynı yerel ağda olmalı; Yeelight ampullerinde **LAN Kontrolü** açık olmalı.
+Güncel derlemenin `EO-Home-windows` dosyasını [Windows build and tests](https://github.com/erenozhan95/EO-Home/actions/workflows/windows.yml) iş akışının başarılı son çalışmasından indir. İçinde `EO-Home.exe` ve `KULLANIM.md` bulunur. Windows 10/11 x64 ve WebView2 gerekir. Ampullerle bilgisayar aynı yerel ağda olmalı; Yeelight ampullerinde **LAN Kontrolü** açık olmalı. [Releases](https://github.com/erenozhan95/EO-Home/releases) sayfasındaki önceki paketler eski adı taşıyabilir.
 
 [Türkçe kullanım kılavuzu](docs/KULLANIM.md)
 
@@ -42,7 +42,7 @@ npm ci
 npm run tauri build -- --no-bundle
 ```
 
-Çıktı: `src-tauri/target/release/EO-Light.exe`. Geliştirme için `npm run tauri dev` kullan.
+Çıktı: `src-tauri/target/release/EO-Home.exe`. Geliştirme için `npm run tauri dev` kullan.
 
 ## Testler
 
@@ -69,7 +69,7 @@ docs/KULLANIM.md     Kullanım kılavuzu
 third-party/         Üçüncü taraf lisans metinleri
 ```
 
-Kişisel cihaz ayarları `Ayarlar/eo-light-v5.json` içinde yalnızca kullanıcının bilgisayarında tutulur; bu dosya Git tarafından yok sayılır. `--diagnose` seçeneğiyle üretilen yerel ağ dökümü de depoya eklenmez.
+Kişisel cihaz ayarları, önceki kurulumlarla uyum için dosya adı korunan `Ayarlar/eo-light-v5.json` içinde yalnızca kullanıcının bilgisayarında tutulur; bu dosya Git tarafından yok sayılır. `--diagnose` seçeneğiyle üretilen yerel ağ dökümü de depoya eklenmez.
 
 ## Lisans ve teşekkür
 

@@ -901,7 +901,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "eo-light"
+name = "eo-home"
 version = "5.0.0"
 dependencies = [
  "if-addrs",

@@ -4,7 +4,7 @@ Push-Location $repo
 try {
     $tracked = @(git ls-files)
     if ($LASTEXITCODE -ne 0) { throw 'Git dosya listesi okunamadı.' }
-    $privatePath = '(^|/)(Ayarlar|node_modules|target|dist|artifacts)/|(^|/)(diagnostics\.json|eo-light-v5\.json|\.env(?:\..*)?|[^/]+\.local\.json)$|\.(exe|dll|pdb|zip|log|pfx|snk|pem|key)$'
+    $privatePath = '(^|/)(Ayarlar|node_modules|target|dist|artifacts)/|(^|/)(diagnostics\.json|eo-light-v5\.json|eo-home\.json|\.env(?:\..*)?|[^/]+\.local\.json)$|\.(exe|dll|pdb|zip|log|pfx|snk|pem|key)$'
     $privateIP = '(?<!\d)(?:10\.(?:\d{1,3}\.){2}\d{1,3}|172\.(?:1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3}|192\.168\.\d{1,3}\.\d{1,3})(?!\d)'
     $textExtensions = @('.cs', '.rs', '.ts', '.css', '.html', '.md', '.mjs', '.json', '.toml', '.yml', '.yaml', '.ps1', '.txt')
     $findings = @()

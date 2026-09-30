@@ -137,7 +137,7 @@ const $ = <T extends HTMLElement = HTMLElement>(query: string) =>
   document.querySelector<T>(query)!;
 
 $("#app").innerHTML = `
-<header class="titlebar"><div class="brand">${icon("lightbulb")}<b>EO<span>·</span>Light</b><span class="version">5</span></div><div class="window-actions"><span class="local-label">${icon("radio")} Yerel bağlantı</span><button data-action="theme" title="Temayı değiştir" aria-label="Temayı değiştir">${icon("sun")}</button><span class="divider"></span><button data-action="hide" title="Sistem tepsisine küçült" aria-label="Sistem tepsisine küçült">${icon("minus")}</button><button data-action="close" class="close" title="Çıkış" aria-label="Çıkış">${icon("x")}</button></div></header>
+<header class="titlebar"><div class="brand">${icon("lightbulb")}<b>EO<span>·</span>Home</b><span class="version">5</span></div><div class="window-actions"><span class="local-label">${icon("radio")} Yerel bağlantı</span><button data-action="theme" title="Temayı değiştir" aria-label="Temayı değiştir">${icon("sun")}</button><span class="divider"></span><button data-action="hide" title="Sistem tepsisine küçült" aria-label="Sistem tepsisine küçült">${icon("minus")}</button><button data-action="close" class="close" title="Çıkış" aria-label="Çıkış">${icon("x")}</button></div></header>
 <div class="shell"><aside><div class="sidebar-heading"><span>CİHAZLARIM</span><span id="count">0</span></div><div id="devices" role="navigation" aria-label="Cihaz seçimi"></div><div class="sidebar-bottom"><div class="connection-summary"><span class="dot"></span><span id="connection-count">Bağlantı bekleniyor</span></div><button class="scan" data-action="scan">${icon("refresh-cw")}<span>Yeniden tara</span></button><p id="scan-time">Açılışta bir kez taranır</p><button class="network-link" data-action="network">${icon("network")} Ağdaki diğer cihazlar <span id="service-count">0</span></button></div></aside>
 <main><div class="page-heading"><div><div class="eyebrow">AKILLI EVİN, TEK BİR YERDE</div><h1>Ev kontrolü</h1></div><span class="connection-mode">${icon("radio")} Aynı anda bağlı</span></div><div id="scan-warning" role="status"></div><section id="panel"></section><footer><span>${icon("monitor")} Yalnızca yerel ağında çalışır</span><span id="footer-note">Cihaz seçmek diğer bağlantıları etkilemez</span></footer></main></div>
 <div id="toast" role="status" aria-live="polite"></div><dialog id="dialog"><div id="dialog-body"></div></dialog>`;
@@ -289,7 +289,7 @@ async function call<T>(
   if (demo) return demoCall(method, args) as T;
   if (!native)
     throw new Error(
-      "Ampulleri kontrol etmek için EO-Light.exe uygulamasını aç.",
+      "Ampulleri kontrol etmek için EO-Home.exe uygulamasını aç.",
     );
   return invoke<T>(method, args);
 }
@@ -457,7 +457,7 @@ const dialogClose = () =>
   `<button class="icon-button" data-action="dismiss" aria-label="Kapat">${icon("x")}</button>`;
 function showDetails(d: Device) {
   showDialog(
-    `<div class="dialog-heading"><h2>Ampul ayarları</h2>${dialogClose()}</div><form id="rename-form"><label>Ampul adı<input id="device-name" value="${esc(label(d))}" maxlength="40" placeholder="Örn. Çalışma lambası" autocomplete="off"></label><button class="primary" type="submit">İsmi kaydet</button></form><dl><dt>Model</dt><dd>${esc(d.model)}</dd><dt>Yerel adres</dt><dd>${esc(d.ip)}:${d.port}</dd><dt>Cihaz kimliği</dt><dd>${esc(d.id)}</dd><dt>Bağlantı</dt><dd>${d.connected ? "Bağlı" : esc(d.error || "Çevrimdışı")}</dd></dl><p class="dialog-note">İsim yalnızca EO-Light içinde kaydedilir. IP değişirse Yeniden tara’yı kullan; ampul kimliğiyle tanınır.</p>`,
+    `<div class="dialog-heading"><h2>Ampul ayarları</h2>${dialogClose()}</div><form id="rename-form"><label>Ampul adı<input id="device-name" value="${esc(label(d))}" maxlength="40" placeholder="Örn. Çalışma lambası" autocomplete="off"></label><button class="primary" type="submit">İsmi kaydet</button></form><dl><dt>Model</dt><dd>${esc(d.model)}</dd><dt>Yerel adres</dt><dd>${esc(d.ip)}:${d.port}</dd><dt>Cihaz kimliği</dt><dd>${esc(d.id)}</dd><dt>Bağlantı</dt><dd>${d.connected ? "Bağlı" : esc(d.error || "Çevrimdışı")}</dd></dl><p class="dialog-note">İsim yalnızca EO-Home içinde kaydedilir. IP değişirse Yeniden tara’yı kullan; ampul kimliğiyle tanınır.</p>`,
   );
   $("#rename-form").addEventListener("submit", (e) => {
     e.preventDefault();
@@ -600,7 +600,7 @@ async function init() {
     await call("ui_ready");
   } else {
     state.scan_error =
-      "Bu bir arayüz önizlemesidir. Cihaz bağlantısı için EO-Light.exe’yi çalıştır.";
+      "Bu bir arayüz önizlemesidir. Cihaz bağlantısı için EO-Home.exe’yi çalıştır.";
     render();
   }
 }

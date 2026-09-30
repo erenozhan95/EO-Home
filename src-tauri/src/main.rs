@@ -1,5 +1,5 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
-use eo_light::{hub::Hub, model::Snapshot};
+use eo_home::{hub::Hub, model::Snapshot};
 use std::sync::{
     atomic::{AtomicBool, Ordering},
     Arc,
@@ -114,12 +114,12 @@ fn main() {
                 hub.start();
                 hub.scan().await;
             });
-            let open = MenuItem::with_id(app, "show", "EO-Light’ı aç", true, None::<&str>)?;
+            let open = MenuItem::with_id(app, "show", "EO-Home’u aç", true, None::<&str>)?;
             let quit = MenuItem::with_id(app, "quit", "Çıkış", true, None::<&str>)?;
             let menu = Menu::with_items(app, &[&open, &quit])?;
             TrayIconBuilder::new()
                 .icon(app.default_window_icon().ok_or("Simge bulunamadı")?.clone())
-                .tooltip("EO-Light · Yerel ışık kontrolü")
+                .tooltip("EO-Home · Yerel akıllı ev kontrolü")
                 .menu(&menu)
                 .show_menu_on_left_click(false)
                 .on_menu_event(|app, event| match event.id.as_ref() {
@@ -155,6 +155,6 @@ fn main() {
         ])
         .run(tauri::generate_context!());
     if let Err(error) = result {
-        eprintln!("EO-Light: {error}");
+        eprintln!("EO-Home: {error}");
     }
 }

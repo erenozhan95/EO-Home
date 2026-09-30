@@ -1,4 +1,4 @@
-use eo_light::{discovery, hub::Hub};
+use eo_home::{discovery, hub::Hub};
 use std::sync::Arc;
 #[tokio::main]
 async fn main() {

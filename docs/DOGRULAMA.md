@@ -1,4 +1,4 @@
-# EO-Light 5 — Doğrulama
+# EO-Home 5 — Doğrulama
 
 - Rust: 5 test geçti (özellik doğrulama, keşif ayrıştırma, bağımsız bağlantılar, adres değişimi, eski ayar aktarımı).
 - 900 ms gecikmeli sahte ampul, diğer ampulün komutunu bekletmedi.

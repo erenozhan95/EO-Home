@@ -1,15 +1,15 @@
 [package]
-name = "eo-light"
+name = "eo-home"
 version = "5.0.0"
 edition = "2021"
-default-run = "EO-Light"
+default-run = "EO-Home"
 
 [[bin]]
-name = "EO-Light"
+name = "EO-Home"
 path = "src/main.rs"
 
 [lib]
-name = "eo_light"
+name = "eo_home"
 path = "src/lib.rs"
 
 [build-dependencies]
