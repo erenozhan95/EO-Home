@@ -25,6 +25,7 @@ import {
   Fan,
 } from "lucide";
 import "./style.css";
+const houseIcon = new URL("../src-tauri/icons/house.svg", import.meta.url).href;
 
 type Device = {
   id: string;
@@ -137,7 +138,7 @@ const $ = <T extends HTMLElement = HTMLElement>(query: string) =>
   document.querySelector<T>(query)!;
 
 $("#app").innerHTML = `
-<header class="titlebar"><div class="brand">${icon("lightbulb")}<b>EO<span>·</span>Home</b><span class="version">5</span></div><div class="window-actions"><span class="local-label">${icon("radio")} Yerel bağlantı</span><button data-action="theme" title="Temayı değiştir" aria-label="Temayı değiştir">${icon("sun")}</button><span class="divider"></span><button data-action="hide" title="Sistem tepsisine küçült" aria-label="Sistem tepsisine küçült">${icon("minus")}</button><button data-action="close" class="close" title="Çıkış" aria-label="Çıkış">${icon("x")}</button></div></header>
+<header class="titlebar"><div class="brand"><img src="${houseIcon}" alt=""><b>EO<span>·</span>Home</b><span class="version">5</span></div><div class="window-actions"><span class="local-label">${icon("radio")} Yerel bağlantı</span><button data-action="theme" title="Temayı değiştir" aria-label="Temayı değiştir">${icon("sun")}</button><span class="divider"></span><button data-action="hide" title="Sistem tepsisine küçült" aria-label="Sistem tepsisine küçült">${icon("minus")}</button><button data-action="close" class="close" title="Çıkış" aria-label="Çıkış">${icon("x")}</button></div></header>
 <div class="shell"><aside><div class="sidebar-heading"><span>CİHAZLARIM</span><span id="count">0</span></div><div id="devices" role="navigation" aria-label="Cihaz seçimi"></div><div class="sidebar-bottom"><div class="connection-summary"><span class="dot"></span><span id="connection-count">Bağlantı bekleniyor</span></div><button class="scan" data-action="scan">${icon("refresh-cw")}<span>Yeniden tara</span></button><p id="scan-time">Açılışta bir kez taranır</p><button class="network-link" data-action="network">${icon("network")} Ağdaki diğer cihazlar <span id="service-count">0</span></button></div></aside>
 <main><div class="page-heading"><div><div class="eyebrow">AKILLI EVİN, TEK BİR YERDE</div><h1>Ev kontrolü</h1></div><span class="connection-mode">${icon("radio")} Aynı anda bağlı</span></div><div id="scan-warning" role="status"></div><section id="panel"></section><footer><span>${icon("monitor")} Yalnızca yerel ağında çalışır</span><span id="footer-note">Cihaz seçmek diğer bağlantıları etkilemez</span></footer></main></div>
 <div id="toast" role="status" aria-live="polite"></div><dialog id="dialog"><div id="dialog-body"></div></dialog>`;

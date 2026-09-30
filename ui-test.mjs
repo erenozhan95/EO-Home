@@ -14,6 +14,10 @@ try {
     throw new Error("Application title is not EO-Home");
   if ((await page.locator(".brand b").innerText()) !== "EO·Home")
     throw new Error("Application brand is not EO-Home");
+  if (
+    !(await page.locator(".brand img").evaluate((img) => img.complete && img.naturalWidth > 0))
+  )
+    throw new Error("House brand icon did not load");
   await page.getByRole("heading", { name: "Çalışma lambası", exact: true }).waitFor();
   if (!(await page.getByLabel("Özel renk seç").isDisabled()))
     throw new Error("Mono RGB enabled");

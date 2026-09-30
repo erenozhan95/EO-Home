@@ -64,10 +64,10 @@ p {
   align-items: center;
   gap: 10px;
 }
-.brand > svg {
-  color: var(--accent);
+.brand > img {
   width: 24px;
   height: 24px;
+  flex-shrink: 0;
 }
 .brand b {
   font-size: 19px;
