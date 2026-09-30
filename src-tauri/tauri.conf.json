@@ -1,6 +1,6 @@
 {
   "$schema":"https://schema.tauri.app/config/2",
-  "productName":"EO-Home", "version":"5.0.0", "identifier":"local.eo.home",
+  "productName":"EO-Home", "version":"5.1.0", "identifier":"local.eo.home",
   "build":{"beforeDevCommand":"npm run dev", "devUrl":"http://localhost:5173", "beforeBuildCommand":"npm run build", "frontendDist":"../dist"},
   "app":{"windows":[{"label":"main","title":"EO-Home","width":1100,"height":780,"minWidth":820,"minHeight":640,"decorations":false,"backgroundColor":"#101417"}],"security":{"csp":"default-src 'self'; connect-src ipc: http://ipc.localhost; img-src 'self' asset: http://asset.localhost data:; style-src 'self' 'unsafe-inline'"}},
   "bundle":{"active":false,"icon":["icons/icon.ico","icons/icon.png"]}
