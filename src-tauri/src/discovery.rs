@@ -38,6 +38,11 @@ fn advertised_kind(value: &str) -> DeviceKind {
     .any(|word| value.contains(word))
     {
         DeviceKind::Climate
+    } else if ["lightbulb", "dimmablelight", "binarylight", "_light._"]
+        .iter()
+        .any(|word| value.contains(word))
+    {
+        DeviceKind::Light
     } else {
         DeviceKind::Other
     }
@@ -94,11 +99,13 @@ pub async fn scan() -> Scan {
     let mdns = tokio::task::spawn_blocking(scan_mdns);
     let mut tasks = tokio::task::JoinSet::new();
     let mut seen = std::collections::HashSet::new();
+    let mut networks = Vec::new();
     if let Ok(interfaces) = if_addrs::get_if_addrs() {
         for i in interfaces {
             if let if_addrs::IfAddr::V4(v) = i.addr {
                 if !v.ip.is_loopback() && v.ip.is_private() && seen.insert(v.ip) && seen.len() <= 8
                 {
+                    networks.push((v.ip, v.netmask));
                     tasks.spawn(scan_interface(v.ip, v.netmask));
                 }
             }
@@ -131,15 +138,38 @@ pub async fn scan() -> Scan {
         out.errors.extend(s.errors);
     }
     out.lamps = lamps.into_values().collect();
-    let mut hosts: BTreeMap<String, Service> = BTreeMap::new();
+    let mut hosts: BTreeMap<String, Service> = scan_neighbors(&networks)
+        .into_iter()
+        .map(|ip| {
+            let address = ip.to_string();
+            (
+                address.clone(),
+                Service {
+                    id: format!("host:{address}"),
+                    ip: address.clone(),
+                    name: format!("Ağ cihazı {address}"),
+                    protocol: "Yerel ağ".into(),
+                    kind: DeviceKind::Other,
+                    climate: None,
+                },
+            )
+        })
+        .collect();
     for service in services.into_values() {
         if let Some(host) = hosts.get_mut(&service.ip) {
+            if host.protocol == "Yerel ağ" {
+                *host = service;
+                continue;
+            }
             if !host.protocol.contains(&service.protocol) {
                 host.protocol.push_str(" + ");
                 host.protocol.push_str(&service.protocol);
             }
             if service.kind == DeviceKind::Climate {
                 host.kind = DeviceKind::Climate;
+                host.name = service.name;
+            } else if service.kind == DeviceKind::Light && host.kind == DeviceKind::Other {
+                host.kind = DeviceKind::Light;
                 host.name = service.name;
             } else if service.protocol == "mDNS" && host.kind == DeviceKind::Other {
                 host.name = service.name;
@@ -148,8 +178,77 @@ pub async fn scan() -> Scan {
             hosts.insert(service.ip.clone(), service);
         }
     }
+    hosts.retain(|ip, _| !out.lamps.iter().any(|lamp| &lamp.ip == ip));
     out.services = hosts.into_values().collect();
     out
+}
+fn scan_targets(ip: Ipv4Addr, mask: Ipv4Addr) -> Vec<Ipv4Addr> {
+    let host = u32::from(ip);
+    let mask = u32::from(mask);
+    let network = host & mask;
+    let broadcast = network | !mask;
+    let (start, end) = if broadcast.saturating_sub(network) <= 1024 {
+        (network.saturating_add(1), broadcast.saturating_sub(1))
+    } else {
+        ((host & 0xffffff00) + 1, (host & 0xffffff00) + 254)
+    };
+    if start > end {
+        return Vec::new();
+    }
+    (start..=end)
+        .filter(|candidate| *candidate != host && (*candidate & mask) == network)
+        .map(Ipv4Addr::from)
+        .collect()
+}
+fn parse_arp_neighbors(text: &str, networks: &[(Ipv4Addr, Ipv4Addr)]) -> Vec<Ipv4Addr> {
+    let mut found = std::collections::BTreeSet::new();
+    for line in text.lines() {
+        let mut columns = line.split_whitespace();
+        let Some(address) = columns.next() else { continue };
+        let Some(mac) = columns.next() else { continue };
+        let octets: Vec<_> = mac.split('-').collect();
+        if octets.len() != 6
+            || !octets
+                .iter()
+                .all(|part| part.len() == 2 && part.chars().all(|c| c.is_ascii_hexdigit()))
+            || octets.iter().all(|part| part.eq_ignore_ascii_case("ff"))
+        {
+            continue;
+        }
+        let Ok(ip) = address.parse::<Ipv4Addr>() else {
+            continue;
+        };
+        if !ip.is_private() || ip.is_multicast() || ip.is_broadcast() {
+            continue;
+        }
+        if networks.iter().any(|(local, mask)| {
+            let network = u32::from(*local) & u32::from(*mask);
+            let candidate = u32::from(ip);
+            candidate != u32::from(*local)
+                && candidate != network
+                && candidate != (network | !u32::from(*mask))
+                && (candidate & u32::from(*mask)) == network
+        }) {
+            found.insert(ip);
+        }
+    }
+    found.into_iter().collect()
+}
+#[cfg(windows)]
+fn scan_neighbors(networks: &[(Ipv4Addr, Ipv4Addr)]) -> Vec<Ipv4Addr> {
+    use std::os::windows::process::CommandExt;
+    let mut command = std::process::Command::new("arp");
+    command.arg("-a").creation_flags(0x0800_0000);
+    command
+        .output()
+        .ok()
+        .filter(|output| output.status.success())
+        .map(|output| parse_arp_neighbors(&String::from_utf8_lossy(&output.stdout), networks))
+        .unwrap_or_default()
+}
+#[cfg(not(windows))]
+fn scan_neighbors(_networks: &[(Ipv4Addr, Ipv4Addr)]) -> Vec<Ipv4Addr> {
+    Vec::new()
 }
 async fn scan_interface(ip: Ipv4Addr, mask: Ipv4Addr) -> Scan {
     let mut result = Scan::default();
@@ -160,12 +259,13 @@ async fn scan_interface(ip: Ipv4Addr, mask: Ipv4Addr) -> Scan {
             return result;
         }
     };
+    let _ = socket.set_broadcast(true);
     let _ = socket.set_multicast_ttl_v4(2);
     let query=b"M-SEARCH * HTTP/1.1\r\nHOST: 239.255.255.250:1982\r\nMAN: \"ssdp:discover\"\r\nST: wifi_bulb\r\n\r\n";
     let general=b"M-SEARCH * HTTP/1.1\r\nHOST: 239.255.255.250:1900\r\nMAN: \"ssdp:discover\"\r\nMX: 2\r\nST: ssdp:all\r\n\r\n";
     let until = Instant::now() + Duration::from_millis(4200);
-    let base = u32::from(ip) & 0xffffff00;
-    let net = u32::from(ip) & u32::from(mask);
+    let targets = scan_targets(ip, mask);
+    let broadcast = Ipv4Addr::from((u32::from(ip) & u32::from(mask)) | !u32::from(mask));
     let mut round = 0;
     let mut resend = Instant::now();
     let mut buffer = [0u8; 8192];
@@ -175,11 +275,9 @@ async fn scan_interface(ip: Ipv4Addr, mask: Ipv4Addr) -> Scan {
         if Instant::now() >= resend && round < 2 {
             let _ = socket.send_to(query, "239.255.255.250:1982").await;
             let _ = socket.send_to(general, "239.255.255.250:1900").await;
-            for host in 1..255 {
-                let addr = Ipv4Addr::from(base | host);
-                if u32::from(addr) & u32::from(mask) == net && addr != ip {
-                    let _ = socket.send_to(query, (addr, 1982)).await;
-                }
+            let _ = socket.send_to(query, (broadcast, 1982)).await;
+            for addr in &targets {
+                let _ = socket.send_to(query, (*addr, 1982)).await;
             }
             round += 1;
             resend = Instant::now() + Duration::from_millis(1200);
@@ -222,6 +320,7 @@ fn scan_mdns() -> Scan {
         "_aircon._tcp.local.",
         "_thermostat._tcp.local.",
         "_climate._tcp.local.",
+        "_light._tcp.local.",
     ];
     let receivers: Vec<_> = types
         .iter()
@@ -285,6 +384,26 @@ mod tests {
         let generic = "HTTP/1.1 200 OK\r\nUSN: uuid:test::upnp:rootdevice\r\nST: upnp:rootdevice\r\nSERVER: Smart climate company\r\n";
         assert_eq!(parse_service(generic, source).unwrap().kind, DeviceKind::Other);
         assert_eq!(advertised_kind("_thermostat._tcp.local."), DeviceKind::Climate);
+        assert_eq!(advertised_kind("urn:schemas-upnp-org:device:DimmableLight:1"), DeviceKind::Light);
         assert_eq!(advertised_kind("_matter._tcp.local."), DeviceKind::Other);
+    }
+    #[test]
+    fn scans_entire_small_subnet_and_filters_arp_to_local_hosts() {
+        let local: Ipv4Addr = "192.0.2.10".parse().unwrap();
+        let mask: Ipv4Addr = "255.255.254.0".parse().unwrap();
+        let targets = scan_targets(local, mask);
+        assert!(targets.contains(&"192.0.3.42".parse().unwrap()));
+        assert!(!targets.contains(&local));
+        let networks = [(Ipv4Addr::new(10, 20, 2, 10), mask)];
+        let table = format!(
+            "  {}  aa-bb-cc-dd-ee-01  dynamic\n  {}  aa-bb-cc-dd-ee-02  dynamic\n  {}  aa-bb-cc-dd-ee-03  dynamic\n  224.0.0.22  01-00-5e-00-00-16  static\n",
+            Ipv4Addr::new(10, 20, 2, 1),
+            Ipv4Addr::new(10, 20, 3, 42),
+            Ipv4Addr::new(10, 20, 5, 2)
+        );
+        assert_eq!(
+            parse_arp_neighbors(&table, &networks),
+            vec![Ipv4Addr::new(10, 20, 2, 1), Ipv4Addr::new(10, 20, 3, 42)]
+        );
     }
 }

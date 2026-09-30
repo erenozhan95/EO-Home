@@ -16,7 +16,7 @@ Bu depo ilk commit'inde **LightController 4.1** adlı C# sürümünü içeriyord
 | --- | --- | --- |
 | Yeelight LAN ampuller | Otomatik keşif ve IP değişince yeniden tarama | Aktif: aç/kapat, parlaklık; cihaz destekliyorsa RGB ve beyaz tonu |
 | Klima / termostat | SSDP veya mDNS ile türünü açıkça duyuruyorsa ayrı cihaz sayfası | Sıcaklık, çalışma modu ve fan arayüzü hazır; gerçek cihaz sürücüsü eklenene kadar kontroller pasif |
-| Diğer akıllı ağ cihazları | Desteklenen SSDP/mDNS duyuruları listelenir | Markaya ve protokole uygun sürücü gerektiği için şimdilik kontrol yok |
+| Diğer ağ cihazları | SSDP/mDNS duyuruları ve Windows ağ komşuları tablosu ana listede gösterilir | Akıllı cihaz olup olmadığı ve kontrolü için markaya uygun sürücü gerekir |
 
 Örneğin birden fazla ampulü aynı anda bağlı tutup soldan seçtiğinin parlaklığını değiştirebilirsin. Bir klima açıkça tanınırsa kendi sayfasında görünür; modeline uygun yerel bağlantı desteği eklenmeden sıcaklık veya fan komutu gönderilmez. Her cihazın ağda bulunması, otomatik olarak kontrol edilebildiği anlamına gelmez.
 
@@ -29,7 +29,7 @@ Bu depo ilk commit'inde **LightController 4.1** adlı C# sürümünü içeriyord
 - Donanım destekliyorsa RGB renk ve 1700–6500 K beyaz sıcaklığı.
 - Cihaz adı değiştirme, koyu/açık tema ve sistem tepsisine küçültme.
 - Cihaz kimliğiyle eşleştirme; IP değiştiğinde isteğe bağlı yeni taramada güncelleme.
-- SSDP/UPnP ve belirli mDNS servislerini listeler. Bu cihazlar için genel kontrol sürücüsü bulunmaz.
+- SSDP/UPnP, belirli mDNS servisleri ve Windows ağ komşularını ana cihaz listesinde gösterir. Ağ komşusu tek başına akıllı cihaz olduğunu kanıtlamaz.
 - Açıkça klima/termostat türü duyuran ağ cihazlarını ayrı sayfada gösterir. Sıcaklık, çalışma modu ve fan ayarları modelin desteklediği özelliklere göre kullanılmak üzere hazırlanmıştır.
 
 ## Teknolojiler

@@ -76,11 +76,15 @@ Başka bir ampul seçtiğinde o ampulün kayıtları gösterilir.
   durum okunur. Bu da cihaz keşfi/tarama değildir.
 - Bir ampulün çevrimdışı olması diğer ampullerin komutlarını bekletmez.
 
-**Ağdaki diğer cihazlar** son taramada SSDP/UPnP ve belirli mDNS servisleriyle
-bulunan cihazları listeler. Her akıllı cihaz kendini aynı şekilde duyurmaz;
-bu liste ağdaki bütün cihazların eksiksiz envanteri değildir.
+Ana liste ve **Ağdaki diğer cihazlar** penceresi SSDP/UPnP, belirli mDNS
+servisleri ve Windows ağ komşuları tablosuyla bulunan adresleri gösterir.
+Yalnızca ağ komşusu olarak görülen cihazların türü bilinmez; listede görünmek
+akıllı cihaz veya kontrol edilebilir ampul olduğunu kanıtlamaz.
+Her cihaz bu yöntemlere yanıt vermeyebilir; liste eksiksiz ağ envanteri değildir.
 Şimdilik ışık kontrolü Yeelight LAN protokolüyle yapılır. Diğer markaların
 kontrolü için ayrıca o markaya uygun bağlantı desteği gerekir.
+Yeelight dışındaki ampuller ağda görünse bile marka protokolü için sürücü
+eklenene kadar ışık ayarları kullanılamaz.
 
 ## Tema ve sistem tepsisi
 

@@ -990,6 +990,36 @@ dd {
   font-size: 10px;
   white-space: nowrap;
 }
+.network-device-card {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 25px;
+  margin-bottom: 16px;
+}
+.network-device-symbol {
+  width: 58px;
+  height: 58px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  color: var(--accent);
+  background: var(--selected);
+}
+.network-device-symbol svg {
+  width: 27px;
+  height: 27px;
+}
+.network-device-card h3 {
+  margin: 8px 0;
+  font-size: 21px;
+}
+.network-device-card p {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
 .climate-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

@@ -902,7 +902,7 @@ dependencies = [
 
 [[package]]
 name = "eo-home"
-version = "5.0.0"
+version = "5.0.1"
 dependencies = [
  "if-addrs",
  "mdns-sd",

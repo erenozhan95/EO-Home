@@ -52,6 +52,10 @@ try {
     await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)
   )
     throw new Error("Horizontal overflow");
+  await page.getByRole("button", { name: /Salon TV/ }).click();
+  await page.getByRole("heading", { name: "Salon TV" }).waitFor();
+  await page.getByText("Bu cihaz için kontrol sürücüsü yok", { exact: false }).waitFor();
+  await page.screenshot({ path: "artifacts/ui/network-device.png" });
   await page.getByRole("button", { name: /Örnek klima/ }).click();
   await page.getByRole("heading", { name: "Örnek klima" }).waitFor();
   const target = page.getByLabel("Klima hedef sıcaklığı");
@@ -66,7 +70,7 @@ try {
   await page.screenshot({ path: "artifacts/ui/climate.png" });
   if (errors.length) throw new Error(errors.join("\n"));
   console.log(
-    "PASS: lamp controls, selection, presets, rename, themes, climate demo controls, minimum width, no browser errors",
+    "PASS: lamp controls, network inventory, presets, rename, themes, climate demo controls, minimum width, no browser errors",
   );
 } finally {
   await browser.close();

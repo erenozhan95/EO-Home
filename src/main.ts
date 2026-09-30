@@ -62,7 +62,7 @@ type Service = {
   ip: string;
   name: string;
   protocol: string;
-  kind: "climate" | "other";
+  kind: "climate" | "light" | "other";
   climate: ClimateState | null;
 };
 type Snapshot = {
@@ -128,9 +128,16 @@ const esc = (s: unknown) =>
 const label = (d: Device) =>
   d.alias || d.name || `Ampul ${state.devices.indexOf(d) + 1}`;
 const selected = () => state.devices.find((d) => d.id === current);
+const selectedService = () =>
+  state.services.find((s) => current === `service:${s.id}`);
 const selectedClimate = () =>
-  state.services.find((s) => s.kind === "climate" && current === `service:${s.id}`);
-const climateServices = () => state.services.filter((s) => s.kind === "climate");
+  selectedService()?.kind === "climate" ? selectedService() : undefined;
+const serviceIcon = (s: Service) =>
+  s.kind === "climate" ? "air-vent" : s.kind === "light" ? "lightbulb" : "network";
+const serviceStatus = (s: Service) =>
+  s.kind === "climate"
+    ? s.climate ? "Klima · Kontrol hazır" : "Klima · Sürücü gerekli"
+    : s.kind === "light" ? "Işık · Sürücü gerekli" : "Bulundu · Sürücü gerekli";
 const supports = (d: Device, method: string) => d.support.includes(method);
 const disabled = (value: boolean) => (value ? "disabled" : "");
 const hex = (n: number) => "#" + n.toString(16).padStart(6, "0");
@@ -172,8 +179,14 @@ function renderClimatePanel(service: Service) {
     </div>
     <p class="climate-note">${climate ? "Yalnızca cihazın bildirdiği desteklenen ayarlar kullanılabilir." : "Ağda bulunması, doğrudan kontrol edilebileceği anlamına gelmez."}</p>`;
 }
+function renderNetworkPanel(service: Service) {
+  $("#panel").innerHTML = `
+    <div class="selected-heading"><div><h2>${esc(service.name)}</h2><span class="model">${esc(service.protocol)}</span></div><span class="climate-badge">${service.kind === "light" ? "Işık bulundu" : "Cihaz bulundu"}</span></div>
+    <section class="card network-device-card"><div class="network-device-symbol">${icon(serviceIcon(service))}</div><div><div class="card-label">YEREL AĞ ADRESİ</div><h3>${esc(service.ip)}</h3><p>${service.protocol === "Yerel ağ" ? "Bu adres ağ komşuları tablosunda görüldü; cihaz türü henüz bilinmiyor." : service.kind === "light" ? "Cihaz kendini ışık olarak duyurdu; kontrol protokolü henüz desteklenmiyor." : "Cihaz ağda servis duyurdu; türü ve kontrol özellikleri henüz doğrulanmadı."}</p></div></section>
+    <div class="offline-banner">${icon("wifi-off")}<span>Bu cihaz için kontrol sürücüsü yok. Ampul, priz veya başka bir cihaz olduğunu yalnızca IP adresinden güvenilir biçimde anlayamayız.</span></div>`;
+}
 function renderSidebar() {
-  $("#count").textContent = String(state.devices.length + climateServices().length);
+  $("#count").textContent = String(state.devices.length + state.services.length);
   $("#devices").innerHTML =
     (state.devices
       .map(
@@ -181,10 +194,10 @@ function renderSidebar() {
           `<button class="device ${d.id === current ? "selected" : ""}" data-action="select" data-id="${esc(d.id)}" aria-pressed="${d.id === current}"><span class="device-icon ${d.power && d.connected ? "on" : ""}">${icon("lightbulb")}</span><span class="device-copy"><b>${esc(label(d))}</b><small><span class="dot ${d.connected ? "online" : "offline"}"></span>${d.connected ? (d.power ? "Açık · %" + d.bright : "Kapalı · Bağlı") : "Çevrimdışı"}</small></span>${icon("chevron-right")}</button>`,
       )
       .join("") +
-      climateServices()
+      state.services
         .map(
           (s) =>
-            `<button class="device ${current === `service:${s.id}` ? "selected" : ""}" data-action="select" data-id="${esc(`service:${s.id}`)}" aria-pressed="${current === `service:${s.id}`}"><span class="device-icon climate-icon">${icon("air-vent")}</span><span class="device-copy"><b>${esc(s.name)}</b><small><span class="dot ${s.climate ? "online" : "offline"}"></span>${s.climate ? "Klima · Kontrol hazır" : "Klima · Sürücü gerekli"}</small></span>${icon("chevron-right")}</button>`,
+            `<button class="device ${current === `service:${s.id}` ? "selected" : ""}" data-action="select" data-id="${esc(`service:${s.id}`)}" aria-pressed="${current === `service:${s.id}`}" title="${esc(serviceStatus(s))}"><span class="device-icon ${s.kind === "climate" ? "climate-icon" : ""}">${icon(serviceIcon(s))}</span><span class="device-copy"><b>${esc(s.name)}</b><small><span class="dot ${s.climate ? "online" : "offline"}"></span>${esc(serviceStatus(s))}</small></span>${icon("chevron-right")}</button>`,
         )
         .join("")) ||
     `<div class="empty-sidebar">${icon("network")}<p>${state.scanning ? "Cihazlar aranıyor…" : "Henüz cihaz bulunamadı"}</p></div>`;
@@ -224,9 +237,15 @@ function renderPanel(force = false) {
     $("#panel").dataset.device = current;
     return;
   }
+  const service = selectedService();
+  if (service) {
+    renderNetworkPanel(service);
+    $("#panel").dataset.device = current;
+    return;
+  }
   if (!d) {
     $("#panel").innerHTML =
-      `<div class="empty-state">${icon("lightbulb")}<h2>${state.scanning ? "Cihazlar aranıyor" : "Cihazlarını bulalım"}</h2><p>${state.scanning ? "Ağdaki uyumlu cihazlar burada görünecek." : "Bilgisayar ve ampul aynı ağda, ampulün LAN kontrolü açık olmalı. Ardından Yeniden tara’ya bas."}</p></div>`;
+      `<div class="empty-state">${icon("network")}<h2>${state.scanning ? "Cihazlar aranıyor" : "Cihazlarını bulalım"}</h2><p>${state.scanning ? "Ağdaki cihazlar burada görünecek." : "Bilgisayar ve cihazlar aynı yerel ağda olmalı. Yeelight ampullerde LAN kontrolünü açıp Yeniden tara’ya bas."}</p></div>`;
     return;
   }
   const draft = drafts.get(d.id) || {};
@@ -271,7 +290,9 @@ function accept(next: Snapshot) {
     (!state.devices.some((d) => d.id === current) &&
       !state.services.some((s) => current === `service:${s.id}`))
   )
-    current = state.selected || state.devices[0]?.id || "";
+    current = state.devices.some((d) => d.id === state.selected)
+      ? state.selected
+      : state.devices[0]?.id || (state.services[0] ? `service:${state.services[0].id}` : "");
   render();
 }
 let toastTimer: ReturnType<typeof setTimeout>;
@@ -475,7 +496,7 @@ function showDetails(d: Device) {
 }
 function showNetwork() {
   showDialog(
-    `<div class="dialog-heading"><h2>Ağdaki diğer cihazlar</h2>${dialogClose()}</div><p class="dialog-note">Son taramanın sonuçları. Cihaz türü yalnızca açıkça duyuruluyorsa tanınır; kontrol için markaya uygun bağlantı desteği gerekir.</p><div class="service-list">${state.services.map((d) => `<div class="service">${icon(d.kind === "climate" ? "air-vent" : "network")}<div><b>${esc(d.name)}</b><small>${d.kind === "climate" ? "Klima/termostat · " : ""}${esc(d.protocol)} · ${esc(d.ip)}</small></div></div>`).join("") || "<p>Son taramada ek cihaz bulunamadı.</p>"}</div>`,
+    `<div class="dialog-heading"><h2>Ağdaki diğer cihazlar</h2>${dialogClose()}</div><p class="dialog-note">Son taramanın sonuçları. Cihaz türü yalnızca açıkça duyuruluyorsa tanınır; kontrol için markaya uygun bağlantı desteği gerekir.</p><div class="service-list">${state.services.map((d) => `<div class="service">${icon(serviceIcon(d))}<div><b>${esc(d.name)}</b><small>${d.kind === "climate" ? "Klima/termostat · " : d.kind === "light" ? "Işık · " : ""}${esc(d.protocol)} · ${esc(d.ip)}</small></div></div>`).join("") || "<p>Son taramada ek cihaz bulunamadı.</p>"}</div>`,
   );
 }
 
