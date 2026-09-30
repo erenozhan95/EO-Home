@@ -22,6 +22,11 @@ work/
 *.dll
 *.pdb
 *.zip
+*.log
+*.pfx
+*.snk
+*.pem
+*.key
 
 # Editors and operating system files
 .vs/
